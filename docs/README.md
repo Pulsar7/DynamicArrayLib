@@ -16,6 +16,14 @@
 This project is an example of how a custom-dynamic-array could be implemented in __C__.
 
 
+You can...
+
+- transfer a static-array to a dynamic-array
+- get an element in a dynamic-array by its index
+- edit an element in a dynamic-array by its index
+- 
+
+
 ### `initialize_list`
 
 The function should be called to create a list and returns its head-pointer. If an error occurs, the function will return a `NULL`-Pointer.

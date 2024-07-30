@@ -118,12 +118,8 @@ ErrorCode append(DynamicArray* head_ptr, void* element, size_t size) {
     
         Returns a self-defined `ErrorCode`
     */
-    if (head_ptr == NULL) {
-        return ERR_NULL_PTR;
-    }
-
-    if (element == NULL) {
-        // Cannot append element to list
+    if (head_ptr == NULL || element == NULL) {
+        // Neither the head_ptr nor the element must be NULL
         return ERR_NULL_PTR;
     }
 
@@ -249,7 +245,7 @@ unsigned int count_elements(DynamicArray* head_ptr) {
 
 DynamicArray* dynamic_array_from_whole(void* static_array, size_t element_size, size_t elements_amount) {
     /*
-        Tranfer a 1-Dimensional static-array as a whole into a custom dynamic array
+        Tranfer a static-array as a whole into a custom dynamic array
 
         Returns the HEAD-Pointer if the transfer was successfull
         Returns the NULL-Pointer if the transfer failed
@@ -275,7 +271,7 @@ DynamicArray* dynamic_array_from_whole(void* static_array, size_t element_size, 
 
 DynamicArray* dynamic_array_from_elements(void* static_array, size_t element_size, size_t elements_amount) {
     /*
-        Tranfer a 1-Dimensional static-array (its elements) into a custom dynamic array
+        Tranfer a static-array (its elements) into a custom dynamic array
 
         Returns the HEAD-Pointer if the transfer was successfull
         Returns the NULL-Pointer if the transfer failed
@@ -310,11 +306,12 @@ DynamicArray* dynamic_array_from_elements(void* static_array, size_t element_siz
     return head_ptr;
 }
 
-ErrorCode append_static_one_dimensional_array(DynamicArray* head_ptr, void* static_array, size_t element_size, size_t elements_amount) {
+ErrorCode append_static_array_to_dynamic(DynamicArray* head_ptr, void* static_array, size_t element_size, size_t elements_amount) {
     /*
-        Append the elements of a 1-Dimensional static-array to an existing custom dynamic array
+        Append the each element of a static-array to an existing custom dynamic array
+        The elements are added at the end of the given dynamic-array
 
-        Returns the custom-Boolean if the operation was successful
+        Returns a custom `ErrorCode`
     */
 
     if (elements_amount <= 0) {
@@ -338,7 +335,7 @@ ErrorCode append_static_one_dimensional_array(DynamicArray* head_ptr, void* stat
         resp = append(head_ptr,element_ptr,element_size);
 
         if (resp != ERR_NONE) {
-            // Probably not necessary
+            // Not necessary
             // clear_list(head_ptr); // Clear the whole list!
 
             return resp;
