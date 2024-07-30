@@ -115,7 +115,7 @@ The output would be:
 (i=4) ELEMENT=5
 ```
 
-But when an element is modified in the static-array, it also will be modified „in the dynamic-array”. This happens, because `dynamic_array_from_whole` just saves the reference (the pointer) to the actual values and not its data.
+But when an element is modified in the static-array, it also will be modified „in the dynamic-array”. This happens, because `dynamic_array_from_whole` just saves the reference (the pointer) to the actual values and not their data.
 
 ```C
 numbers[0] = 9;
