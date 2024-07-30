@@ -19,6 +19,12 @@ int main(int argc, const char** argv) {
         printf("(i=%d) ELEMENT=%d\n",i,*(int*)get_element_by_index(head_ptr,i));
     }
 
+    numbers[0] = 9;
+    
+    for (int i = 0; i < 5; i++) {
+        printf("(i=%d) ELEMENT=%d\n",i,*(int*)get_element_by_index(head_ptr,i));
+    }
+    
     clear_list(head_ptr);
 
 
@@ -50,7 +56,11 @@ int main(int argc, const char** argv) {
         return 1;
     }
 
-    
+    printf("%s\n",(char*)head_ptr->element);
+
+    // Or accessing it via `get_element_by_index`
+
+    printf("%s\n",(char*)get_element_by_index(head_ptr,0));
 
     clear_list(head_ptr);
 
