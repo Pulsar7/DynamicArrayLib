@@ -21,7 +21,7 @@ You can...
 - transfer a static-array to a dynamic-array
 - get an element in a dynamic-array by its index
 - edit an element in a dynamic-array by its index
-- 
+- append a static-array to an existing dynamic-array
 
 
 ### `initialize_list`
@@ -41,7 +41,7 @@ int numbers[] = {1,2,3,4,5};
 
 size_t element_size = sizeof(int);
 
-DynamicArray* head_ptr = dynamic_array_from_elements(numbers, element_size, sizeof(numbers) /element_size);
+DynamicArray* head_ptr = dynamic_array_from_elements(numbers, element_size, sizeof(numbers) / element_size);
 
 if (head_ptr == NULL) {
     return 1;

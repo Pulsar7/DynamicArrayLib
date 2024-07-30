@@ -15,16 +15,42 @@ int main(int argc, const char** argv) {
         return 1;
     }
 
-    for (int i = 0; i < 5; i++) {
-        printf("(i=%d) ELEMENT=%d\n",i,*(int*)get_element_by_index(head_ptr,i));
+    for (int i = 0; i < 10; i++) {
+        void* current_element = get_element_by_index(head_ptr,i);
+        if (current_element == NULL) {
+            // Probably an invalid index
+            break;
+        }
+        printf("(i=%d) ELEMENT=%d\n",i,*(int*)current_element);
     }
 
     numbers[0] = 9;
     
-    for (int i = 0; i < 5; i++) {
-        printf("(i=%d) ELEMENT=%d\n",i,*(int*)get_element_by_index(head_ptr,i));
+    for (int i = 0; i < 10; i++) {
+        void* current_element = get_element_by_index(head_ptr,i);
+        if (current_element == NULL) {
+            // Probably an invalid index
+            break;
+        }
+        printf("(i=%d) ELEMENT=%d\n",i,*(int*)current_element);
     }
-    
+
+    // Append the same static-array to the dynamic-list
+
+    if (append_static_array_to_dynamic(head_ptr,numbers,element_size,sizeof(numbers) / element_size) != ERR_NONE) {
+        clear_list(head_ptr);
+        return 1;
+    }
+
+    for (int i = 0; i < 10; i++) {
+        void* current_element = get_element_by_index(head_ptr,i);
+        if (current_element == NULL) {
+            // Probably an invalid index
+            break;
+        }
+        printf("(i=%d) ELEMENT=%d\n",i,*(int*)current_element);
+    }
+
     clear_list(head_ptr);
 
 
@@ -37,7 +63,7 @@ int main(int argc, const char** argv) {
         return 1;
     }
 
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < sizeof(numbers) / element_size; i++) {
         int* this_elements = (int*)head_ptr->element;
         printf("(i=%d) ELEMENT=%d\n",i,this_elements[i]);
     }
@@ -62,7 +88,11 @@ int main(int argc, const char** argv) {
 
     // Or accessing it via `get_element_by_index`
 
-    printf("%s\n",(char*)get_element_by_index(head_ptr,0));
+    void* selected_element = get_element_by_index(head_ptr,0);
+
+    if (selected_element != NULL) {
+        printf("%s\n",(char*)selected_element);
+    }
 
     clear_list(head_ptr);
 
@@ -77,7 +107,12 @@ int main(int argc, const char** argv) {
     }
 
     for (int i = 0; i < strlen(message); i++) {
-        printf("%c",*(char*)get_element_by_index(head_ptr,i));
+        void* current_element = get_element_by_index(head_ptr,i);
+        if (current_element == NULL) {
+            // Probably an invalid index
+            break;
+        }
+        printf("%c",*(char*)current_element);
     }
 
     printf("\n");
@@ -93,7 +128,12 @@ int main(int argc, const char** argv) {
     }
 
     for (int i = 0; i < strlen(message); i++) {
-        printf("%c",*(char*)get_element_by_index(head_ptr,i));
+        void* current_element = get_element_by_index(head_ptr,i);
+        if (current_element == NULL) {
+            // Probably an invalid index
+            break;
+        }
+        printf("%c",*(char*)current_element);
     }
 
     printf("\n");
