@@ -9,6 +9,7 @@
     - [`initialize_list`](#initialize_list)
     - [`dynamic_array_from_elements`](#dynamic_array_from_elements)
     - [`dynamic_array_from_whole`](#dynamic_array_from_whole)
+  - [Testing](#testing)
 
 ## Description
 
@@ -126,4 +127,14 @@ And of course, don't forget to clear the allocated data:
 
 ```C
 clear_list(head_ptr);
+```
+
+
+## Testing
+
+I've written some implementation-examples of this project in __src/main.c__. 
+
+```BASH
+make
+./example_main
 ```

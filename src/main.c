@@ -50,6 +50,8 @@ int main(int argc, const char** argv) {
 
     char* message = "Hello World";
 
+    element_size = sizeof(char);
+
     head_ptr = dynamic_array_from_whole(message, element_size, strlen(message));
 
     if (head_ptr == NULL) {
@@ -61,6 +63,40 @@ int main(int argc, const char** argv) {
     // Or accessing it via `get_element_by_index`
 
     printf("%s\n",(char*)get_element_by_index(head_ptr,0));
+
+    clear_list(head_ptr);
+
+
+
+    // Additional string-tests
+
+    head_ptr = dynamic_array_from_elements(message, element_size, strlen(message));
+
+    if (head_ptr == NULL) {
+        return 1;
+    }
+
+    for (int i = 0; i < strlen(message); i++) {
+        printf("%c",*(char*)get_element_by_index(head_ptr,i));
+    }
+
+    printf("\n");
+
+
+    // Edit a character
+
+    char new_element = 'R';
+
+    if (change_element_by_index(head_ptr,1,sizeof(char),(void*)&new_element) != ERR_NONE) {
+        clear_list(head_ptr);
+        return 1;
+    }
+
+    for (int i = 0; i < strlen(message); i++) {
+        printf("%c",*(char*)get_element_by_index(head_ptr,i));
+    }
+
+    printf("\n");
 
     clear_list(head_ptr);
 

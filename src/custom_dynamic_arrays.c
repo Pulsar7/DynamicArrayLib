@@ -16,6 +16,7 @@ static DynamicArray* add_node(DynamicArray* head_ptr, void* element, size_t size
     }
     
     // Allocate space for the struct using `malloc`
+    // Allocate space for the Node itself
     DynamicArray* current_ptr = (DynamicArray*)malloc(sizeof(DynamicArray));
     
     if (current_ptr == NULL) {
@@ -372,12 +373,43 @@ void* get_element_by_index(DynamicArray* head_ptr, unsigned int index) {
     }
 
     if (current_ptr == NULL) {
-        // Given index is too large
+        // Index is out of bounds
         return NULL;
     }
 
     return current_ptr->element;
 }
 
+ErrorCode change_element_by_index(DynamicArray* head_ptr, unsigned int index, size_t element_size, void* new_element) {
+    /*
+        Change an existing elment in the List by its Index
 
+        Returns a custom `ErrorCode`
+    */
 
+    if (head_ptr == NULL || new_element == NULL) {
+        // List does not exist or new_element is Null
+        return ERR_NULL_PTR;
+    }
+
+    // Iterate list
+
+    DynamicArray* current_ptr = head_ptr;
+    unsigned int counter = 0;
+
+    while (current_ptr != NULL && counter != index) {
+        current_ptr = current_ptr->next_ptr;
+        counter++;
+    }
+
+    if (current_ptr == NULL) {
+        // Index is out of bounds
+        return ERR_INVALID_INDEX;
+    }
+
+    // Replace the element
+    memcpy(current_ptr->element,new_element,element_size);
+
+    // Changed element
+    return ERR_NONE;
+}

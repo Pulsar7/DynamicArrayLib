@@ -42,6 +42,7 @@ DynamicArray* dynamic_array_from_elements(void* static_array, size_t element_siz
 DynamicArray* dynamic_array_from_whole(void* static_array, size_t element_size, size_t elements_amount);
 ErrorCode append_static_one_dimensional_array(DynamicArray* head_ptr, void* static_array, size_t element_size, size_t elements_amount);
 void* get_element_by_index(DynamicArray* head_ptr, unsigned int index);
+ErrorCode change_element_by_index(DynamicArray* head_ptr, unsigned int index, size_t element_size, void* new_element);
 
 
 #endif // CUSTOM_DYNAMIC_ARRAYS_H
