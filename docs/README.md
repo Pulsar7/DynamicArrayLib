@@ -1,6 +1,15 @@
 # DynamicArrayLib
 
 
+## Table of contents
+
+- [DynamicArrayLib](#dynamicarraylib)
+  - [Table of contents](#table-of-contents)
+  - [Description](#description)
+    - [`initialize_list`](#initialize_list)
+    - [`dynamic_array_from_elements`](#dynamic_array_from_elements)
+    - [`dynamic_array_from_whole`](#dynamic_array_from_whole)
+
 ## Description
 
 This project is an example of how a custom-dynamic-array could be implemented in __C__.
