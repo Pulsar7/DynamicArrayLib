@@ -5,7 +5,7 @@ static DynamicArray* add_node(DynamicArray* head_ptr, void* element, size_t size
     /*
         Adding node to a specific location of the list
 
-        If node-location is neither `LIST_START` nor `LIST_END`, 
+        When node-location is neither `LIST_START` nor `LIST_END`, 
         the node-location will be interpreted as an index.
     
     */
