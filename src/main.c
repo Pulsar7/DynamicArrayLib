@@ -145,7 +145,7 @@
 
 
 int main(int argc, const char** argv) {
-    size_t* dimensions = {1, 2, 3};
+    size_t dimensions[] = {1, 2, 3};
 
     MultiDimensionalMatrix* matrix = create_matrix(3,dimensions,TYPE_INT);
 
@@ -154,11 +154,15 @@ int main(int argc, const char** argv) {
         return 1;
     }
 
+    printf("Created the matrix\n");
+
     int number = 9;
 
-    size_t* indices = {1, 1, 1};
+    size_t indices[] = {1, 1, 1};
 
-    if (set_element_by_indices(matrix,indices,&number) != ERR_NONE) {
+    ErrorCode resp_code = set_element_by_indices(matrix,indices,(void*)&number);
+
+    if (resp_code != ERR_NONE) {
         printf("Couldn't set element\n");
     }
 

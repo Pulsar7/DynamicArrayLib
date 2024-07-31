@@ -29,7 +29,7 @@ MultiDimensionalMatrix* create_matrix(size_t number_of_dimensions, size_t* dimen
     matrix->number_of_dimensions = number_of_dimensions;
 
     // Allocate space for the dimensions-array
-    matrix->dimensions = (size_t*) malloc(sizeof(number_of_dimensions * sizeof(size_t)));
+    matrix->dimensions = (size_t*) malloc(number_of_dimensions * sizeof(size_t));
 
     if (!matrix->dimensions) {
         // Allocation-Error
@@ -37,12 +37,12 @@ MultiDimensionalMatrix* create_matrix(size_t number_of_dimensions, size_t* dimen
         return NULL;
     }
 
-    memcpy(matrix->dimensions,dimensions,sizeof(number_of_dimensions * sizeof(size_t)));
+    memcpy(matrix->dimensions, dimensions, number_of_dimensions * sizeof(size_t));
 
     // Get total size of dimensions
-    size_t total_size = 0;
+    size_t total_size = 1;
 
-    for (int i = 0; i < number_of_dimensions; i++) {
+    for (size_t i = 0; i < number_of_dimensions; i++) {
         total_size *= dimensions[i];
     }
 
@@ -108,7 +108,7 @@ void clear_matrix(MultiDimensionalMatrix* matrix) {
 
 IndexCalcReturn calc_index(MultiDimensionalMatrix* matrix, size_t* indices) {
     /*
-        Calculate the 1-Dimensional index of the given multidimensional indices
+        Calculate the index of the 1-Dimensional-array with the given multidimensional indices
 
         Returns the custom `IndexCalcReturn`-struct in order to return the index and
         a self-defined Error-Code, if something went wrong.
@@ -125,11 +125,11 @@ IndexCalcReturn calc_index(MultiDimensionalMatrix* matrix, size_t* indices) {
     size_t index = 0; // Calculated index
     /*
     
-    The offset is used to account for the size of each dimension and to calculate the 
-    correct position of an element in a flattened version of the multidimensional array.
+        The offset is used to account for the size of each dimension and to calculate the 
+        correct position of an element in a flattened version of the multidimensional array.
     
     */
-   
+
     size_t offset = 1;
 
     /*
@@ -214,7 +214,7 @@ ErrorCode set_element_by_indices(MultiDimensionalMatrix* matrix, size_t* indices
         Returns a custom `ErrorCode`
     */
 
-    if (!matrix || !value || !indices) {
+    if (!matrix || !indices) {
         // Matrix/value/indices does not exist
         return ERR_NULL_PTR;
     }
