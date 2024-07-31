@@ -2,9 +2,10 @@
 #define CUSTOM_DYNAMIC_ARRAYS_H
 
 #include <stdlib.h>
-#include <stdio.h>
 #include <limits.h> // For UINT_MAX
 #include <string.h>
+
+#include "constants.h"
 
 
 typedef struct DynamicArray {
@@ -17,17 +18,6 @@ typedef enum NodeLocation {
     LIST_START = 0,
     LIST_END = -1
 } NodeLocation;
-
-
-typedef enum ErrorCode {
-    ERR_NONE = 0x00,
-    ERR_NULL_PTR = 0x01,
-    ERR_MALLOC_FAILED = 0x02,
-    ERR_INVALID_INDEX = 0x03,
-    ERR_LIST_EMPTY = 0x04,
-    ERR_INVALID_HEAD_PTR = 0x05,
-    ERR_UNKNOWN = 0xFF
-} ErrorCode;
 
 
 

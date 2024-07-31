@@ -1,7 +1,7 @@
 #include "main.h"
 
 
-int main(int argc, const char** argv) {
+/*int main(int argc, const char** argv) {
     DynamicArray* head_ptr = NULL;
 
     // Copy every single element of a static-array in a dynamic-array
@@ -139,6 +139,30 @@ int main(int argc, const char** argv) {
     printf("\n");
 
     clear_list(head_ptr);
+
+    return 0;
+}*/
+
+
+int main(int argc, const char** argv) {
+    size_t* dimensions = {1, 2, 3};
+
+    MultiDimensionalMatrix* matrix = create_matrix(3,dimensions,TYPE_INT);
+
+    if (!matrix) {
+        printf("Couldn't create matrix\n");
+        return 1;
+    }
+
+    int number = 9;
+
+    size_t* indices = {1, 1, 1};
+
+    if (set_element_by_indices(matrix,indices,&number) != ERR_NONE) {
+        printf("Couldn't set element\n");
+    }
+
+    clear_matrix(matrix);
 
     return 0;
 }
