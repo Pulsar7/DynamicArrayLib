@@ -262,6 +262,70 @@ ErrorCode set_element_by_indices(MultiDimensionalMatrix* matrix, size_t* indices
     return ERR_NONE;
 }
 
+ErrorCode fill_matrix_from_static_array(MultiDimensionalMatrix* matrix, void* static_array, size_t* static_dimensions, size_t number_of_dimensions, DataType data_type) {
+    /*
+    
+        Fill a given matrix with a static-array
+
+        Returns a custom `ErrorCode` (should be `ERR_NONE` if no error occured)
+
+    */
+
+    if (!matrix || !static_array || !static_dimensions) {
+        // NULL-Pointer
+        return ERR_NULL_PTR;
+    }
+
+    // Check data type
+    if (matrix->data_type != data_type) {
+        // Matrix-data-type is not the same as the given static-array data-type
+        return ERR_INVALID_ARGS;
+    }
+
+    // Check dimensions
+    if (matrix->number_of_dimensions != number_of_dimensions) {
+        // Dimension mismatch
+        return ERR_INVALID_ARGS;
+    }
+
+    // Determine the size of each element
+    size_t element_size = 0;
+
+    switch (data_type) {
+        case TYPE_INT:
+            element_size = sizeof(int);
+            break;
+        case TYPE_FLOAT:
+            element_size = sizeof(float);
+            break;
+        case TYPE_DOUBLE:
+            element_size = sizeof(double);
+            break;
+        default:
+            // Unsupported data_type
+            // Reachable?
+            return ERR_UNKNOWN;
+    }
+
+    size_t total_size = matrix->data_size / element_size;
+
+    // Iterate through the array and print each element
+    /*
+    
+    !!! ToDo: LOGIC !!!
+
+    for (size_t i = 0; i < total_size; i++) {
+        (*((char*)static_array + (i * element_size)));
+
+    }
+    
+    */
+
+}
+
+
+// Arithmetic Operations
+
 ArithmeticOperationReturn add_matrices(const MultiDimensionalMatrix* matrix_A, const MultiDimensionalMatrix* matrix_B) {
     /*
 
@@ -277,7 +341,7 @@ ArithmeticOperationReturn add_matrices(const MultiDimensionalMatrix* matrix_A, c
     response.error_code = ERR_NONE;
 
     if (!matrix_A || !matrix_B) {
-        // Wether `matrix_A` or `matrix_B` is a NULL-Pointer
+        // Wether `matrix_A` or `matrix_B` (or both) is a NULL-Pointer
         response.error_code = ERR_NULL_PTR;
         return response;
     }
@@ -423,3 +487,4 @@ ArithmeticOperationReturn multiply_2d_matrices(const MultiDimensionalMatrix* mat
     // Successfully multiplied two 2D-matrices
     return response;
 }
+
