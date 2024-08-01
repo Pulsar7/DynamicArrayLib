@@ -158,12 +158,20 @@ int main(int argc, const char** argv) {
 
     int number = 9;
 
-    size_t indices[] = {1, 1, 1};
+    size_t indices[] = {0, 1, 1};
 
     ErrorCode resp_code = set_element_by_indices(matrix,indices,(void*)&number);
 
     if (resp_code != ERR_NONE) {
         printf("Couldn't set element\n");
+    }
+
+    void* element = get_element_by_indices(matrix,indices);
+
+    if (element) {
+        printf("Matrix[0][1][1] = %d\n",*(int*)element);
+    } else {
+        printf("Couldn't get element\n");
     }
 
     clear_matrix(matrix);
