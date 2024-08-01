@@ -22,9 +22,9 @@ You can...
 - modify a created multidimensional matrix
 
 
-See [DynamicArrays-README.md](./docs/DynamicArrays-README.md) for explanations and examples for the Dynamic-Arrays.
+See [DynamicArrays-README.md](./DynamicArrays-README.md) for explanations and examples for the Dynamic-Arrays.
 
-See [MultiDimensionalMatrices-README.md](./docs/MultiDimensionalMatrices-README.md) for explanations and examples for the Multi-Dimensional-Matrices.
+See [MultiDimensionalMatrices-README.md](./MultiDimensionalMatrices-README.md) for explanations and examples for the Multi-Dimensional-Matrices.
 
 
 ## Testing
