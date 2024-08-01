@@ -1,7 +1,7 @@
 #include "main.h"
 
 
-int main(int argc, const char** argv) {
+/*int main(int argc, const char** argv) {
     DynamicArray* head_ptr = NULL;
 
     // Copy every single element of a static-array in a dynamic-array
@@ -139,6 +139,115 @@ int main(int argc, const char** argv) {
     printf("\n");
 
     clear_list(head_ptr);
+
+    return 0;
+}*/
+
+
+int main(int argc, const char** argv) {
+    size_t dimensions[] = {2, 2};
+
+    MultiDimensionalMatrix* matrixA = create_matrix(2,dimensions,TYPE_INT);
+
+    if (!matrixA) {
+        printf("Couldn't create matrixA\n");
+        return 1;
+    }
+
+    printf("Created the matrixA\n");
+
+    MultiDimensionalMatrix* matrixB = create_matrix(2,dimensions,TYPE_INT);
+
+    if (!matrixB) {
+        printf("Couldn't create matrixB\n");
+        clear_matrix(matrixA);
+        return 1;
+    }
+
+    printf("Created the matrixB\n");
+
+    // Fill both matrices
+    int elements[2][2] = {
+        {1, 1},
+        {1, 1}
+    };
+
+    size_t indices[2];
+    ErrorCode error_code;
+
+    for (int i = 0; i < 2; i++) {
+        for (int j = 0; j < 2; j++) {
+            indices[0] = i;
+            indices[1] = j;
+            error_code = set_element_by_indices(matrixA,indices,(void*)&elements[i][j]);
+
+            if (error_code != ERR_NONE) {
+                printf("Couldn't fill matrixA due to an error\n");
+                break;
+            }
+
+            error_code = set_element_by_indices(matrixB,indices,(void*)&elements[i][j]);
+
+            if (error_code != ERR_NONE) {
+                printf("Couldn't fill matrixB due to an error\n");
+                break;
+            }
+        }
+    }
+    //
+
+
+    ArithmeticOperationReturn response = add_matrices(matrixA, matrixB);
+
+    if (response.error_code == ERR_NONE) {
+        // Successfully added both matrices
+        MultiDimensionalMatrix* result_matrix = response.result_matrix;
+
+        printf("Sucessfully added both matrices!\n");
+
+        // printout the result-matrix
+        size_t indices[2];
+        void* element;
+
+        for (size_t i = 0; i < 2; i++) {
+            for (size_t j = 0; j < 2; j++) {
+                indices[0] = i;
+                indices[1] = j;
+
+                element = get_element_by_indices(result_matrix, indices);
+                
+                if (!element) {
+                    printf("Couldn't get element at result_matrix[%ld][%ld]\n",i,j);
+                    break;
+                }
+
+                printf("result_matrix[%ld][%ld]=%d\n",i,j,*(int*)element);
+            }
+        }
+
+    } else {
+        // An error occured
+        printf("Couldn't add both matrices\n");
+        
+        // Handle the specific `ErrorCode`
+
+        if (response.error_code == ERR_INVALID_ARGS) {
+            printf("MatrixA and MatrixB have different dimensions or the `data_type` of MatrixA and MatrixB are not the same!\n");
+        }
+
+        if (response.error_code == ERR_NULL_PTR) {
+            printf("One or both of MatrixA and MatrixB aren't valid matrices.\n");
+        }
+
+        if (response.error_code == ERR_UNKNOWN) {
+            printf("An unkown error occured.\n");
+        }
+    }
+
+    // Clear the allocated space
+    clear_matrix(matrixA); 
+    clear_matrix(matrixB);
+    clear_matrix(response.result_matrix);
 
     return 0;
 }
