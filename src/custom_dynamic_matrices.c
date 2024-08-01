@@ -106,7 +106,7 @@ void clear_matrix(MultiDimensionalMatrix* matrix) {
     return;
 }
 
-IndexCalcReturn calc_index(MultiDimensionalMatrix* matrix, size_t* indices) {
+static IndexCalcReturn calc_index(MultiDimensionalMatrix* matrix, size_t* indices) {
     /*
         Calculate the index of the 1-Dimensional-array with the given multidimensional indices
 
