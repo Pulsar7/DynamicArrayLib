@@ -5,6 +5,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h> // For debugging
 
 
 typedef enum DataType {
@@ -27,6 +28,11 @@ typedef struct IndexCalcReturn {
     ErrorCode error_code;
 } IndexCalcReturn;
 
+typedef struct ArithmeticOperationReturn {
+    MultiDimensionalMatrix* result_matrix;
+    ErrorCode error_code;  
+} ArithmeticOperationReturn;
+
 
 
 // Functions
@@ -36,7 +42,8 @@ void clear_matrix(MultiDimensionalMatrix* matrix);
 static IndexCalcReturn calc_index(MultiDimensionalMatrix* matrix, size_t* indices);
 void* get_element_by_indices(MultiDimensionalMatrix* matrix, size_t* indices);
 ErrorCode set_element_by_indices(MultiDimensionalMatrix* matrix, size_t* indices, void* value);
-MultiDimensionalMatrix* multiply_matrices(const MultiDimensionalMatrix* matrix_A, const MultiDimensionalMatrix* matrix_B);
+ArithmeticOperationReturn add_matrices(const MultiDimensionalMatrix* matrix_A, const MultiDimensionalMatrix* matrix_B);
+ArithmeticOperationReturn multiply_matrices(const MultiDimensionalMatrix* matrix_A, const MultiDimensionalMatrix* matrix_B);
 
 
 #endif // CUSTOM_DYNAMIC_MATRICES_H

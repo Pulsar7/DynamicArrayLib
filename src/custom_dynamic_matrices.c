@@ -262,7 +262,106 @@ ErrorCode set_element_by_indices(MultiDimensionalMatrix* matrix, size_t* indices
     return ERR_NONE;
 }
 
+ArithmeticOperationReturn add_matrices(const MultiDimensionalMatrix* matrix_A, const MultiDimensionalMatrix* matrix_B) {
+    /*
 
-MultiDimensionalMatrix* multiply_matrices(const MultiDimensionalMatrix* matrix_A, const MultiDimensionalMatrix* matrix_B) {
+        Addition of two multidimensional-matrices
+
+        Returns a custom-defined `ArithmeticOperationReturn`-struct, which contains the result-matrix (NULL-Pointer if an error occured)
+        and an `ErrorCode`.
+    
+    */
+
+    ArithmeticOperationReturn response;
+    response.result_matrix = NULL;
+    response.error_code = ERR_NONE;
+
+    if (!matrix_A || !matrix_B) {
+        // Wether `matrix_A` or `matrix_B` is a NULL-Pointer
+        response.error_code = ERR_NULL_PTR;
+        return response;
+    }
+
+    // Check dimensions
+    if (matrix_A->number_of_dimensions != matrix_B->number_of_dimensions) {
+        // Cannot add two matrices with different dimensions
+        response.error_code = ERR_INVALID_ARGS;
+        return response;
+    }
+
+    for (size_t i = 0; i < matrix_A->number_of_dimensions; i++) {
+        if (matrix_A->dimensions[i] != matrix_B->dimensions[i]) {
+            // Mismatch
+            response.error_code = ERR_INVALID_ARGS;
+            return response;
+        }
+    }
+    
+    // Check data_type
+    if (matrix_A->data_type != matrix_B->data_type) {
+        // Cannot add two matrices with different data-types
+        response.error_code = ERR_INVALID_ARGS;
+        return response;
+    }
+
+    // Creating the `result_matrix`
+    MultiDimensionalMatrix* result_matrix = create_matrix(matrix_A->number_of_dimensions, matrix_A->dimensions, matrix_A->data_type);
+
+    if (!result_matrix) {
+        // Couldn't create the `result_matrix`
+        response.error_code = ERR_UNKNOWN;
+        return response;
+    }
+
+    response.result_matrix = result_matrix;
+
+    // Calculate the sum of both matrices
+    
+    size_t total_elements;
+
+    switch(matrix_A->data_type) {
+        case TYPE_INT:
+            total_elements = matrix_A->data_size / sizeof(int);
+            int* int_dataA = (int*)matrix_A->data;
+            int* int_dataB = (int*)matrix_B->data; 
+            for (size_t i = 0; i < total_elements; i++) {
+                ((int*)result_matrix->data)[i] = int_dataA[i] + int_dataB[i];
+            }
+            break;
+        
+        case TYPE_FLOAT:
+            total_elements = matrix_A->data_size / sizeof(float);
+            float* float_dataA = (float*)matrix_A->data;
+            float* float_dataB = (float*)matrix_B->data; 
+            for (size_t i = 0; i < total_elements; i++) {
+                ((float*)result_matrix->data)[i] = float_dataA[i] + float_dataB[i];
+            }
+            break;
+
+        case TYPE_DOUBLE:
+            total_elements = matrix_A->data_size / sizeof(double);
+            double* double_dataA = (double*)matrix_A->data;
+            double* double_dataB = (double*)matrix_B->data; 
+            for (size_t i = 0; i < total_elements; i++) {
+                ((double*)result_matrix->data)[i] = double_dataA[i] + double_dataB[i];
+            }
+            break;
+
+        default:
+            // Unsupported Data_Type
+            // This section shouldn't be reached
+            response.error_code = ERR_UNKNOWN;
+            clear_matrix(result_matrix);
+            response.result_matrix = NULL; // required?
+            return response;
+    }
+
+    // Successfully added two matrices
+    return response;
+
+}
+
+
+ArithmeticOperationReturn multiply_matrices(const MultiDimensionalMatrix* matrix_A, const MultiDimensionalMatrix* matrix_B) {
 
 }

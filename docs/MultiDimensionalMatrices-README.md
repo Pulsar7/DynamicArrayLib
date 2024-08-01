@@ -8,6 +8,8 @@
   - [Usage \& Example](#usage--example-1)
 - [`set_element_by_indices`](#set_element_by_indices)
   - [Usage \& Example](#usage--example-2)
+- [`add_matrices`](#add_matrices)
+  - [Usage \& Example](#usage--example-3)
 
 
 ## `create_matrix`
@@ -122,4 +124,54 @@ if (resp_code != ERR_NONE) {
 
 // Clear the allocated space
 clear_matrix(matrix); 
+```
+
+
+## `add_matrices`
+
+With this function, you're able to add two given matrices.
+
+The required parameters are: `const MultiDimensionalMatrix* matrix_A, const MultiDimensionalMatrix* matrix_B`
+
+The function returns an __ArithmeticOperationReturn__-struct, which contains both, the pointer to the result-matrix and an `ErrorCode`.
+If something went wrong, the function should return the __NULL-Pointer__ as the result-matrix and an accordingly __ErrorCode__.
+
+
+### Usage & Example
+
+```C
+// size_t dimensionsA[] = {1, 2, 3};
+// size_t dimensionsB[] = {1, 2, 3};
+// `matrixA` & `matrixB` created successfully
+
+ArithmeticOperationReturn response = add_matrices(matrixA, matrixB);
+
+if (response.error_code == ERR_NONE) {
+    // Successfully added both matrices
+    ArithmeticOperationReturn* result_matrix = response.result_matrix;
+
+    printf("Sucessfully added both matrices!\n");
+} else {
+    // An error occured
+    printf("Couldn't add both matrices\n");
+    
+    // Handle the specific `ErrorCode`
+
+    if (response.error_code == ERR_INVALID_ARGS) {
+        printf("MatrixA and MatrixB have different dimensions or the `data_type` of MatrixA and MatrixB are not the same!\n");
+    }
+
+    if (response.error_code == ERR_NULL_PTR) {
+        printf("One or both of MatrixA and MatrixB aren't valid matrices.\n");
+    }
+
+    if (response.error_code == ERR_UNKNOWN) {
+        printf("An unkown error occured.\n");
+    }
+}
+
+// Clear the allocated space
+clear_matrix(matrixA); 
+clear_matrix(matrixB);
+clear_matrix(response.result_matrix);
 ```

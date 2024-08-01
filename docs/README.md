@@ -18,8 +18,10 @@ You can...
 - get an element in a dynamic-array by its index
 - edit an element in a dynamic-array by its index
 - append a static-array to an existing dynamic-array
-- create a multidimensional matrix
-- modify a created multidimensional matrix
+- create a (multidimensional) matrix
+- modify a created (multidimensional) matrix
+- get an element in a matrix by its indices
+- calculate the sum of two (multidimensional) matrices
 
 
 See [DynamicArrays-README.md](./DynamicArrays-README.md) for explanations and examples for the Dynamic-Arrays.
