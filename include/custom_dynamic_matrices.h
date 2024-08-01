@@ -43,7 +43,7 @@ static IndexCalcReturn calc_index(MultiDimensionalMatrix* matrix, size_t* indice
 void* get_element_by_indices(MultiDimensionalMatrix* matrix, size_t* indices);
 ErrorCode set_element_by_indices(MultiDimensionalMatrix* matrix, size_t* indices, void* value);
 ArithmeticOperationReturn add_matrices(const MultiDimensionalMatrix* matrix_A, const MultiDimensionalMatrix* matrix_B);
-ArithmeticOperationReturn multiply_matrices(const MultiDimensionalMatrix* matrix_A, const MultiDimensionalMatrix* matrix_B);
+ArithmeticOperationReturn multiply_2d_matrices(const MultiDimensionalMatrix* matrix_A, const MultiDimensionalMatrix* matrix_B);
 
 
 #endif // CUSTOM_DYNAMIC_MATRICES_H

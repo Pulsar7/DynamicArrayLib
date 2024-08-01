@@ -10,6 +10,7 @@
   - [Usage \& Example](#usage--example-2)
 - [`add_matrices`](#add_matrices)
   - [Usage \& Example](#usage--example-3)
+- [`multiply_2d_matrices`](#multiply_2d_matrices)
 
 
 ## `create_matrix`
@@ -129,7 +130,7 @@ clear_matrix(matrix);
 
 ## `add_matrices`
 
-With this function, you're able to add two given matrices.
+With this function, you can calculate the sum of two matrices.
 
 The required parameters are: `const MultiDimensionalMatrix* matrix_A, const MultiDimensionalMatrix* matrix_B`
 
@@ -175,3 +176,9 @@ clear_matrix(matrixA);
 clear_matrix(matrixB);
 clear_matrix(response.result_matrix);
 ```
+
+
+## `multiply_2d_matrices`
+
+This function is still in development.
+Logic is not implemented until now.

@@ -5,7 +5,7 @@ MultiDimensionalMatrix* create_matrix(size_t number_of_dimensions, size_t* dimen
     /*
         Create a multidimensional matrix
 
-        Returns the Matrix as a pointer
+        Returns the matrix as a pointer
         Returns a NULL-Pointer if an error occured
     */
 
@@ -362,6 +362,64 @@ ArithmeticOperationReturn add_matrices(const MultiDimensionalMatrix* matrix_A, c
 }
 
 
-ArithmeticOperationReturn multiply_matrices(const MultiDimensionalMatrix* matrix_A, const MultiDimensionalMatrix* matrix_B) {
+ArithmeticOperationReturn multiply_2d_matrices(const MultiDimensionalMatrix* matrix_A, const MultiDimensionalMatrix* matrix_B) {
+    /*
+        Multiplication of two 2-Dimensional-matrices
 
+        Returns a custom-defined `ArithmeticOperationReturn`-struct, which contains the result-matrix (NULL-Pointer if an error occured)
+        and an `ErrorCode`.
+    */
+
+    ArithmeticOperationReturn response;
+    response.result_matrix = NULL;
+    response.error_code = ERR_NONE;
+
+    if (!matrix_A || !matrix_B) {
+        // Wether `matrix_A` or `matrix_B` is a NULL-Pointer
+        response.error_code = ERR_NULL_PTR;
+        return response;
+    }
+
+    // Check dimensions
+    if (matrix_A->number_of_dimensions != 2 || matrix_B->number_of_dimensions != 2) {
+        // The given matrices are not 2-Dimensional
+        response.error_code = ERR_INVALID_ARGS;
+        return response;
+    }
+
+
+    /*
+
+        !!! ToDo: Check rows and columns of matrixA and matrixB !!!
+    
+    */
+    
+
+    // Check data_type
+    if (matrix_A->data_type != matrix_B->data_type) {
+        // Cannot multiply two matrices with different data-types
+        response.error_code = ERR_INVALID_ARGS;
+        return response;
+    }
+
+    // Creating the `result_matrix`
+    MultiDimensionalMatrix* result_matrix = create_matrix(matrix_A->number_of_dimensions, matrix_A->dimensions, matrix_A->data_type);
+
+    if (!result_matrix) {
+        // Couldn't create the `result_matrix`
+        response.error_code = ERR_UNKNOWN;
+        return response;
+    }
+
+    response.result_matrix = result_matrix;
+    
+    /*
+
+        !!! ToDo: LOGIC !!!
+    
+    */
+
+
+    // Successfully multiplied two 2D-matrices
+    return response;
 }
