@@ -209,7 +209,7 @@ void* get_element_by_indices(MultiDimensionalMatrix* matrix, size_t* indices) {
 
 ErrorCode set_element_by_indices(MultiDimensionalMatrix* matrix, size_t* indices, void* value) {
     /*
-        Set an element on the given position (indices)
+        Set an element at the given position (indices)
 
         Returns a custom `ErrorCode`
     */
@@ -228,7 +228,22 @@ ErrorCode set_element_by_indices(MultiDimensionalMatrix* matrix, size_t* indices
     }
 
     size_t index = return_data.index;
-    
+
+    return set_element_by_linear_index(matrix, index, value);
+}
+
+static ErrorCode set_element_by_linear_index(MultiDimensionalMatrix* matrix, size_t index, void* value) {
+    /*
+        Set an element at the given position, but by its flat/linear index in the struct.
+
+        Returns a custom `ErrorCode`
+    */
+
+    if (!matrix || !value) {
+        // One or both of matrix and value are the NULL-Pointer
+        return ERR_NULL_PTR;
+    }
+
     // Check if calculated index is out of bounds
     // Modifies the element with this index
     switch(matrix->data_type) {
@@ -260,7 +275,9 @@ ErrorCode set_element_by_indices(MultiDimensionalMatrix* matrix, size_t* indices
     }
 
     return ERR_NONE;
+
 }
+
 
 ErrorCode fill_matrix_from_static_array(MultiDimensionalMatrix* matrix, void* static_array, size_t* static_dimensions, size_t number_of_dimensions, DataType data_type) {
     /*
@@ -309,18 +326,24 @@ ErrorCode fill_matrix_from_static_array(MultiDimensionalMatrix* matrix, void* st
 
     size_t total_size = matrix->data_size / element_size;
 
-    // Iterate through the array and print each element
-    /*
-    
-    !!! ToDo: LOGIC !!!
+    // Iterate through the array
+    void* this_element;
+    ErrorCode response;
 
     for (size_t i = 0; i < total_size; i++) {
-        (*((char*)static_array + (i * element_size)));
+        // Iterate byte-wise
+        this_element = (void*) (((char*)static_array + (i * element_size)));
+
+        // Set element at specific position
+        response = set_element_by_linear_index(matrix, i, this_element);
+        
+        if (response != ERR_NONE) {
+            // Couldn't set element in matrix
+            return response;
+        }
 
     }
     
-    */
-
 }
 
 

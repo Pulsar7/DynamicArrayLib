@@ -144,7 +144,7 @@
 }*/
 
 
-int main(int argc, const char** argv) {
+/*int main(int argc, const char** argv) {
     size_t dimensions[] = {2, 2};
 
     MultiDimensionalMatrix* matrixA = create_matrix(2,dimensions,TYPE_INT);
@@ -248,6 +248,66 @@ int main(int argc, const char** argv) {
     clear_matrix(matrixA); 
     clear_matrix(matrixB);
     clear_matrix(response.result_matrix);
+
+    return 0;
+}*/
+
+
+int main(int argc, const char** argv) {
+    size_t dimensions[] = {2, 2, 2};
+
+    MultiDimensionalMatrix* matrix = create_matrix(3,dimensions,TYPE_INT);
+
+    if (!matrix) {
+        printf("Couldn't create matrix\n");
+        return 1;
+    }
+
+    printf("Created the matrix\n");
+
+
+    int static_array[2][2][2] = {
+        {
+            {1, 2},
+            {3, 4}
+        },
+        {
+            {5, 6},
+            {7, 8}
+        }
+    };
+
+    ErrorCode response = fill_matrix_from_static_array(matrix, (void*)static_array, dimensions, 3, TYPE_INT);
+
+    if (response == ERR_NONE) {
+        // printout the matrix
+        size_t indices[3];
+        void* element;
+
+        for (size_t i = 0; i < 2; i++) {
+            for (size_t j = 0; j < 2; j++) {
+                for (size_t k = 0; k < 2; k++) {
+                    indices[0] = i;
+                    indices[1] = j;
+                    indices[2] = k;
+
+                    element = get_element_by_indices(matrix, indices);
+                    
+                    if (!element) {
+                        printf("Couldn't get element at matrix[%ld][%ld][%ld]\n",i,j,k);
+                        break;
+                    }
+
+                    printf("matrix[%ld][%ld][%ld]=%d\n",i,j,k,*(int*)element);
+                }
+            }
+        }
+    } else {
+        printf("THIS IS FINE.\n");
+    }
+
+    // Clear the allocated space
+    clear_matrix(matrix); 
 
     return 0;
 }
