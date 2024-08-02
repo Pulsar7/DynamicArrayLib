@@ -17,7 +17,7 @@
 
 ## `create_matrix`
 
-This function create a matrix with the given parameters: `size_t number_of_dimensions, size_t* dimensions, DataType data_type`.
+This function create a matrix with the given parameters:
 
 - `size_t number_of_dimensions`: The „depth” of the matrix
 - `size_t* dimensions`: The amount of the elements of every dimension
@@ -58,7 +58,7 @@ clear_matrix(matrix);
 
 With this function, you're able to get a specific element in a given matrix.
 
-The required parameters are: `MultiDimensionalMatrix* matrix, size_t* indices`
+The required parameters are:
 
 - `MultiDimensionalMatrix* matrix`: The given matrix
 - `size_t* indices`: The „coordinates” to the requested element in the matrix
@@ -93,7 +93,7 @@ clear_matrix(matrix);
 
 With this function, you're able to set/modify a specific element in a given matrix.
 
-The required parameters are: `MultiDimensionalMatrix* matrix, size_t* indices, void* value`
+The required parameters are:
 
 - `MultiDimensionalMatrix* matrix`: *See description at [get_element_by_indices](#get_element_by_indices)*
 - `size_t* indices`: *See description at [get_element_by_indices](#get_element_by_indices)*
@@ -133,7 +133,13 @@ clear_matrix(matrix);
 
 This function is able to copy the values of a static-array into a given matrix.
 
-The required parameters are: `MultiDimensionalMatrix* matrix, void* static_array, size_t* static_dimensions, size_t number_of_dimensions, DataType data_type`
+The required parameters are:
+
+- `MultiDimensionalMatrix* matrix`: *See description at [get_element_by_indices](#get_element_by_indices)*
+- `void* static_array`: The given static-array
+- `size_t* static_dimensions`: The amount of the elements of every dimension (has to be the same dimensions as the used dimensions-array while creating the matrix)
+- `size_t number_of_dimensions`: The amount of dimensions of the static-array
+- `DataType data_type`: *See description at [create_matrix](#create_matrix)*
 
 The function returns a custom __ErrorCode__, which should be __ERR_NONE__ if no error occured.
 
