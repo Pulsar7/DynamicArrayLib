@@ -8,8 +8,10 @@
   - [Usage \& Example](#usage--example-1)
 - [`set_element_by_indices`](#set_element_by_indices)
   - [Usage \& Example](#usage--example-2)
-- [`add_matrices`](#add_matrices)
+- [`fill_matrix_from_static_array`](#fill_matrix_from_static_array)
   - [Usage \& Example](#usage--example-3)
+- [`add_matrices`](#add_matrices)
+  - [Usage \& Example](#usage--example-4)
 - [`multiply_2d_matrices`](#multiply_2d_matrices)
 
 
@@ -122,6 +124,65 @@ if (resp_code != ERR_NONE) {
 }
 
 // Successfully modified the value at `[0][1][1]`
+
+// Clear the allocated space
+clear_matrix(matrix); 
+```
+
+## `fill_matrix_from_static_array`
+
+This function is able to copy the values of a static-array into a given matrix.
+
+The required parameters are: `MultiDimensionalMatrix* matrix, void* static_array, size_t* static_dimensions, size_t number_of_dimensions, DataType data_type`
+
+The function returns a custom __ErrorCode__, which should be __ERR_NONE__ if no error occured.
+
+### Usage & Example
+
+```C
+// size_t dimensions[] = {2, 2, 2};
+// Matrix created successfully
+
+int static_array[2][2][2] = {
+  {
+    {1, 2},
+    {3, 4}
+  },
+
+  {
+    {5, 6},
+    {7, 8}
+  }
+};
+
+ErrorCode response = fill_matrix_from_static_array(matrix, (void*)static_array, dimensions, 3, TYPE_INT);
+
+if (response == ERR_NONE) {
+  // printout the matrix
+  size_t indices[3];
+  void* element;
+
+  for (size_t i = 0; i < 2; i++) {
+    for (size_t j = 0; j < 2; j++) {
+      for (size_t k = 0; k < 2; k++) {
+        indices[0] = i;
+        indices[1] = j;
+        indices[2] = k;
+
+        element = get_element_by_indices(matrix, indices);
+        
+        if (!element) { 
+          printf("Couldn't get element at matrix[%ld][%ld][%ld]\n",i,j,k);
+          break;
+        }
+
+        printf("matrix[%ld][%ld][%ld]=%d\n",i,j,k,*(int*)element);
+      }
+    }
+  }
+} else {
+  printf("THIS IS FINE.\n");
+}
 
 // Clear the allocated space
 clear_matrix(matrix); 

@@ -344,6 +344,8 @@ ErrorCode fill_matrix_from_static_array(MultiDimensionalMatrix* matrix, void* st
 
     }
     
+    return ERR_NONE;
+
 }
 
 
