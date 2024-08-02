@@ -4,30 +4,38 @@
 <h2>Table of contents</h2>
 
 - [Description](#description)
+  - [Dynamic Arrays](#dynamic-arrays)
+  - [Multidimensional Matrices](#multidimensional-matrices)
 - [Testing](#testing)
+- [Installation](#installation)
 
 
 ## Description
 
-This project is an example of how a custom-dynamic-array could be implemented in __C__.
+DynamicArrayLib is a C library that provides custom implementations for dynamic arrays and multidimensional matrices. This library demonstrates how to create, manage, and manipulate dynamic arrays and matrices efficiently in C.
 
 
-You can...
 
-- transfer a static-array to a dynamic-array
-- get an element in a dynamic-array by its index
-- edit an element in a dynamic-array by its index
-- append a static-array to an existing dynamic-array
-- create a (multidimensional) matrix
-- modify a created (multidimensional) matrix
-- get an element in a matrix by its indices
-- calculate the sum of two (multidimensional) matrices
-- fill a given matrix with a static-array
+### Dynamic Arrays
+
+- Convert a static array to a dynamic array
+- Retrieve an element from a dynamic array by its index
+- Edit an element in a dynamic array by its index
+- Append a static array to an existing dynamic array
+
+Documentation: [DynamicArrays-README.md](./DynamicArrays-README.md)
+
+### Multidimensional Matrices
+
+- Create a multidimensional matrix
+- Modify elements in a multidimensional matrix
+- Retrieve an element from a matrix by its indices
+- Calculate the sum of two multidimensional matrices
+- Fill a matrix with a static array
+- (Calculate the product of two 2-Dimensional matrices) - __in development__
 
 
-See [DynamicArrays-README.md](./DynamicArrays-README.md) for explanations and examples for the Dynamic-Arrays.
-
-See [MultiDimensionalMatrices-README.md](./MultiDimensionalMatrices-README.md) for explanations and examples for the Multi-Dimensional-Matrices.
+Documentation: [MultiDimensionalMatrices-README.md](./MultiDimensionalMatrices-README.md)
 
 
 ## Testing
@@ -37,4 +45,13 @@ I've written some implementation-examples of this project in __src/main.c__.
 ```BASH
 make
 ./example_main
+```
+
+## Installation
+
+To use this library in your project, clone the repository and include the relevant files in your project.
+
+```bash
+git clone github.com/Pulsar7/DynamicArrayLib.git
+cd DynamicArrayLib
 ```
