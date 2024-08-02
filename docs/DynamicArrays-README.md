@@ -4,21 +4,40 @@
 <h2>Table of contents</h2>
 
 - [`initialize_list`](#initialize_list)
+  - [Usage \& Example](#usage--example)
 - [`dynamic_array_from_elements`](#dynamic_array_from_elements)
+  - [Usage \& Example](#usage--example-1)
 - [`dynamic_array_from_whole`](#dynamic_array_from_whole)
+  - [Usage \& Example](#usage--example-2)
 
 
-### `initialize_list`
+## `initialize_list`
 
 The function should be called to create a list and returns its head-pointer. If an error occurs, the function will return a `NULL`-Pointer.
 
+### Usage & Example
 
-### `dynamic_array_from_elements`
+```C
+int numbber = 1337;
+
+DynamicArray* head_ptr = initialize_list((void*)&number, sizeof(number));
+
+if (head_ptr == NULL) {
+    return 1;
+}
+
+// Deallocate DynamicArray
+clear_list(head_ptr);
+```
+
+
+
+## `dynamic_array_from_elements`
 
 This function copies the actual values of the given static-array.
 
 
-See here:
+### Usage & Example
 
 ```C
 int numbers[] = {1,2,3,4,5};
@@ -41,6 +60,7 @@ for (int i = 0; i < 5; i++) {
     printf("(i=%d) ELEMENT=%d\n",i,*(int*)get_element_by_index(head_ptr,i));
 }
 
+// Deallocate DynamicArray
 clear_list(head_ptr);
 ```
 
@@ -62,11 +82,12 @@ The output would be:
 While the static-array has been modified, the values in the dynamic-list remain unmodified.
 
 
-### `dynamic_array_from_whole`
+## `dynamic_array_from_whole`
 
 This function copies the the pointers to its elements and saves them into a dynamic-array.
 
-See here: 
+
+### Usage & Example 
 
 ```C
 int numbers[] = {1,2,3,4,5};

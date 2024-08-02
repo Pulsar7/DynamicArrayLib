@@ -22,6 +22,7 @@ You can...
 - modify a created (multidimensional) matrix
 - get an element in a matrix by its indices
 - calculate the sum of two (multidimensional) matrices
+- fill a given matrix with a static-array
 
 
 See [DynamicArrays-README.md](./DynamicArrays-README.md) for explanations and examples for the Dynamic-Arrays.
