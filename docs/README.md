@@ -52,6 +52,6 @@ make
 To use this library in your project, clone the repository and include the relevant files in your project.
 
 ```bash
-git clone github.com/Pulsar7/DynamicArrayLib.git
+git clone https://github.com/Pulsar7/DynamicArrayLib/tree/main
 cd DynamicArrayLib
 ```
