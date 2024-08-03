@@ -476,12 +476,11 @@ ArithmeticOperationReturn multiply_2d_matrices(const MultiDimensionalMatrix* mat
         return response;
     }
 
-
-    /*
-
-        !!! ToDo: Check rows and columns of matrixA and matrixB !!!
-    
-    */
+    if (matrix_A->dimensions[1] != matrix_B->dimensions[0]) {
+        // Columns of matrix_A aren't equal to the rows of matrix_B
+        response.error_code = ERR_INVALID_ARGS;
+        return response;
+    }
     
 
     // Check data_type
@@ -492,7 +491,10 @@ ArithmeticOperationReturn multiply_2d_matrices(const MultiDimensionalMatrix* mat
     }
 
     // Creating the `result_matrix`
-    MultiDimensionalMatrix* result_matrix = create_matrix(matrix_A->number_of_dimensions, matrix_A->dimensions, matrix_A->data_type);
+    size_t result_matrix_dimensions[] = {
+        matrix_A->dimensions[0], matrix_B->dimensions[1]
+    };
+    MultiDimensionalMatrix* result_matrix = create_matrix((size_t)2, result_matrix_dimensions, matrix_A->data_type);
 
     if (!result_matrix) {
         // Couldn't create the `result_matrix`
@@ -501,13 +503,66 @@ ArithmeticOperationReturn multiply_2d_matrices(const MultiDimensionalMatrix* mat
     }
 
     response.result_matrix = result_matrix;
-    
-    /*
 
-        !!! ToDo: LOGIC !!!
-    
-    */
+    // Calculate the product of both matrices
 
+    size_t rows_A = matrix_A->dimensions[0], cols_A = matrix_A->dimensions[1];
+    size_t cols_B = matrix_B->dimensions[1];
+
+    switch(matrix_A->data_type) {
+        case TYPE_INT:
+            int* int_dataA = (int*)matrix_A->data;
+            int* int_dataB = (int*)matrix_B->data; 
+            int* int_result = (int*)result_matrix->data;
+
+            for (size_t i = 0; i < rows_A; i++) {
+                for (size_t j = 0; j < cols_B; j++) {
+                    int_result[i * cols_B + j] = 0; // Initialize result element
+                    for (size_t k = 0; k < cols_A; k++) {
+                        int_result[i * cols_B + j] += int_dataA[i * cols_A + k] * int_dataB[k * cols_B + j];
+                    }
+                }
+            }
+            break;
+        
+        case TYPE_FLOAT:
+            float* float_dataA = (float*)matrix_A->data;
+            float* float_dataB = (float*)matrix_B->data; 
+            float* float_result = (float*)result_matrix->data;
+
+            for (size_t i = 0; i < rows_A; i++) {
+                for (size_t j = 0; j < cols_B; j++) {
+                    float_result[i * cols_B + j] = 0; // Initialize result element
+                    for (size_t k = 0; k < cols_A; k++) {
+                        float_result[i * cols_B + j] += float_dataA[i * cols_A + k] * float_dataB[k * cols_B + j];
+                    }
+                }
+            }
+            break;
+
+        case TYPE_DOUBLE:
+            double* double_dataA = (double*)matrix_A->data;
+            double* double_dataB = (double*)matrix_B->data; 
+            double* double_result = (double*)result_matrix->data;
+
+            for (size_t i = 0; i < rows_A; i++) {
+                for (size_t j = 0; j < cols_B; j++) {
+                    double_result[i * cols_B + j] = 0; // Initialize result element
+                    for (size_t k = 0; k < cols_A; k++) {
+                        double_result[i * cols_B + j] += double_dataA[i * cols_A + k] * double_dataB[k * cols_B + j];
+                    }
+                }
+            }
+            break;
+
+        default:
+            // Unsupported Data_Type
+            // This section shouldn't be reached
+            response.error_code = ERR_UNKNOWN;
+            clear_matrix(result_matrix);
+            response.result_matrix = NULL; // required?
+            return response;
+    }
 
     // Successfully multiplied two 2D-matrices
     return response;

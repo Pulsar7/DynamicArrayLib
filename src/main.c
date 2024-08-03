@@ -253,7 +253,7 @@
 }*/
 
 
-int main(int argc, const char** argv) {
+/*int main(int argc, const char** argv) {
     size_t dimensions[] = {2, 2, 2};
 
     MultiDimensionalMatrix* matrix = create_matrix(3,dimensions,TYPE_INT);
@@ -308,6 +308,132 @@ int main(int argc, const char** argv) {
 
     // Clear the allocated space
     clear_matrix(matrix); 
+
+    return 0;
+}*/
+
+int main(int argc, const char** argv) {
+    size_t dimensions[] = {2, 2};
+
+    MultiDimensionalMatrix* matrix_A = create_matrix(2,dimensions,TYPE_INT);
+
+    if (!matrix_A) {
+        printf("Couldn't create matrix_A\n");
+        return 1;
+    }
+
+    printf("Created the matrix_A\n");
+
+
+    int static_array[2][2] = {
+        {1, 2},
+        {3, 4}
+    };
+
+    ErrorCode response = fill_matrix_from_static_array(matrix_A, (void*)static_array, dimensions, 2, TYPE_INT);
+
+    if (response != ERR_NONE) {
+        printf("THIS IS FINE.\n");
+        clear_matrix(matrix_A);
+        return 1;
+    } 
+
+    // printout the matrix
+    size_t indices[3];
+    void* element;
+
+    for (size_t i = 0; i < 2; i++) {
+        for (size_t j = 0; j < 2; j++) {
+            indices[0] = i;
+            indices[1] = j;
+
+            element = get_element_by_indices(matrix_A, indices);
+            
+            if (!element) {
+                printf("Couldn't get element at matrix_A[%ld][%ld]\n",i,j);
+                break;
+            }
+
+            printf("matrix_A[%ld][%ld]=%d\n",i,j,*(int*)element);
+        }
+    }
+
+    MultiDimensionalMatrix* matrix_B = create_matrix(2,dimensions,TYPE_INT);
+
+    if (!matrix_B) {
+        printf("Couldn't create matrix_B\n");
+        return 1;
+    }
+
+    printf("Created the matrix_B\n");
+
+
+    int _static_array[2][2] = {
+        {5, 6},
+        {7, 8}
+    };
+
+    response = fill_matrix_from_static_array(matrix_B, (void*)_static_array, dimensions, 2, TYPE_INT);
+
+    if (response != ERR_NONE) {
+        printf("THIS IS FINE.\n");
+        clear_matrix(matrix_A);
+        clear_matrix(matrix_B);
+        return 1;
+    } 
+    
+    // printout the matrix
+
+    for (size_t i = 0; i < 2; i++) {
+        for (size_t j = 0; j < 2; j++) {
+            indices[0] = i;
+            indices[1] = j;
+
+            element = get_element_by_indices(matrix_B, indices);
+            
+            if (!element) {
+                printf("Couldn't get element at matrix_B[%ld][%ld]\n",i,j);
+                break;
+            }
+
+            printf("matrix_B[%ld][%ld]=%d\n",i,j,*(int*)element);
+        }
+    }
+
+    ArithmeticOperationReturn operation_resp = multiply_2d_matrices(matrix_A, matrix_B);
+
+    if (operation_resp.error_code != ERR_NONE) {
+        printf("THIS IS FINE.\n");
+        clear_matrix(matrix_A);
+        clear_matrix(matrix_B);
+        return 1;
+    }
+
+    printf("Calculated the matrices-product of matrix_A and matrix_B\n");
+
+    // printout the matrix
+
+    MultiDimensionalMatrix* result_matrix = operation_resp.result_matrix;
+
+    for (size_t i = 0; i < 2; i++) {
+        for (size_t j = 0; j < 2; j++) {
+            indices[0] = i;
+            indices[1] = j;
+
+            element = get_element_by_indices(result_matrix, indices);
+            
+            if (!element) {
+                printf("Couldn't get element at result_matrix[%ld][%ld]\n",i,j);
+                break;
+            }
+
+            printf("result_matrix[%ld][%ld]=%d\n",i,j,*(int*)element);
+        }
+    }
+
+    // Clear the allocated space
+    clear_matrix(matrix_A);
+    clear_matrix(matrix_B);
 
     return 0;
 }

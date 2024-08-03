@@ -13,6 +13,8 @@
 - [`add_matrices`](#add_matrices)
   - [Usage \& Example](#usage--example-4)
 - [`multiply_2d_matrices`](#multiply_2d_matrices)
+  - [Important Note](#important-note)
+  - [Usage \& Example](#usage--example-5)
 
 
 ## `create_matrix`
@@ -247,5 +249,135 @@ clear_matrix(response.result_matrix);
 
 ## `multiply_2d_matrices`
 
-This function is still in development.
-Logic is not implemented until now.
+Multiply two given 2-Dimensional matrices.
+
+The required parameters are: `const MultiDimensionalMatrix* matrix_A, const MultiDimensionalMatrix* matrix_B`
+
+The function returns an __ArithmeticOperationReturn__-struct, which contains both, the pointer to the result-matrix and an `ErrorCode`.
+If something went wrong, the function should return the __NULL-Pointer__ as the result-matrix and an accordingly __ErrorCode__.
+
+### Important Note
+
+Currently, the following calculation block is redundant and repeated for each data type in the code:
+
+```C
+for (size_t i = 0; i < rows_A; i++) {
+  for (size_t j = 0; j < cols_B; j++) {
+    int_result[i * cols_B + j] = 0; // Initialize result element
+    for (size_t k = 0; k < cols_A; k++) {
+        int_result[i * cols_B + j] += int_dataA[i * cols_A + k] * int_dataB[k * cols_B + j];
+    }
+  }
+}
+```
+
+However, I haven't found a way to implement these calculations generically for all supported data types. The current implementation repeats the block for each data type (int, float, double), which is not ideal.
+
+### Usage & Example
+
+```C
+// size_t dimensionsA[] = {2, 2};
+// size_t dimensionsB[] = {2, 2};
+// `matrixA` & `matrixB` created successfully
+
+int static_array[2][2] = {
+  {1, 2},
+  {3, 4}
+};
+
+ErrorCode response = fill_matrix_from_static_array(matrix_A, (void*)static_array, dimensions, 2, TYPE_INT);
+
+if (response != ERR_NONE) {
+  printf("THIS IS FINE.\n");
+  clear_matrix(matrix_A);
+  return 1;
+} 
+
+// printout the matrix
+size_t indices[3];
+void* element;
+
+for (size_t i = 0; i < 2; i++) {
+  for (size_t j = 0; j < 2; j++) {
+    indices[0] = i;
+    indices[1] = j;
+
+    element = get_element_by_indices(matrix_A, indices);
+    
+    if (!element) {
+      printf("Couldn't get element at matrix_A[%ld][%ld]\n",i,j);
+      break;
+    }
+
+  printf("matrix_A[%ld][%ld]=%d\n",i,j,*(int*)element);
+  }
+}
+
+int _static_array[2][2] = {
+  {5, 6},
+  {7, 8}
+};
+
+response = fill_matrix_from_static_array(matrix_B, (void*)_static_array, dimensions, 2, TYPE_INT);
+
+if (response != ERR_NONE) {
+  printf("THIS IS FINE.\n");
+  clear_matrix(matrix_A);
+  clear_matrix(matrix_B);
+  return 1;
+} 
+
+// printout the matrix
+
+for (size_t i = 0; i < 2; i++) {
+  for (size_t j = 0; j < 2; j++) {
+    indices[0] = i;
+    indices[1] = j;
+
+    element = get_element_by_indices(matrix_B, indices);
+    
+    if (!element) {
+      printf("Couldn't get element at matrix_B[%ld][%ld]\n",i,j);
+      break;
+    }
+
+    printf("matrix_B[%ld][%ld]=%d\n",i,j,*(int*)element);
+  }
+}
+
+ArithmeticOperationReturn operation_resp = multiply_2d_matrices(matrix_A, matrix_B);
+
+if (operation_resp.error_code != ERR_NONE) {
+  printf("THIS IS FINE.\n");
+  clear_matrix(matrix_A);
+  clear_matrix(matrix_B);
+  return 1;
+}
+
+printf("Calculated the matrices-product of matrix_A and matrix_B\n");
+
+// printout the matrix
+
+MultiDimensionalMatrix* result_matrix = operation_resp.result_matrix;
+
+for (size_t i = 0; i < 2; i++) {
+  for (size_t j = 0; j < 2; j++) {
+    indices[0] = i;
+    indices[1] = j;
+
+    element = get_element_by_indices(result_matrix, indices);
+    
+    if (!element) {
+      printf("Couldn't get element at result_matrix[%ld][%ld]\n",i,j);
+      break;
+    }
+
+    printf("result_matrix[%ld][%ld]=%d\n",i,j,*(int*)element);
+  }
+}
+
+// Clear the allocated space
+clear_matrix(matrix_A);
+clear_matrix(matrix_B);
+clear_matrix(result_matrix);
+```
