@@ -33,6 +33,7 @@ Documentation: [DynamicArrays-README.md](./DynamicArrays-README.md)
 - Calculate the sum of two multidimensional matrices
 - Fill a matrix with a static array
 - Calculate the product of two 2-Dimensional matrices
+- Multiplication of scalar and matrix
 
 
 Documentation: [MultiDimensionalMatrices-README.md](./MultiDimensionalMatrices-README.md)
