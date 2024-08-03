@@ -8,13 +8,21 @@
   - [Usage \& Example](#usage--example-1)
 - [`set_element_by_indices`](#set_element_by_indices)
   - [Usage \& Example](#usage--example-2)
-- [`add_matrices`](#add_matrices)
+- [`fill_matrix_from_static_array`](#fill_matrix_from_static_array)
   - [Usage \& Example](#usage--example-3)
+- [`add_matrices`](#add_matrices)
+  - [Usage \& Example](#usage--example-4)
+- [`multiply_2d_matrices`](#multiply_2d_matrices)
+  - [Important Note](#important-note)
+  - [Usage \& Example](#usage--example-5)
+- [`scalar_multiply_matrix`](#scalar_multiply_matrix)
+  - [Usage \& Example](#usage--example-6)
+- [Summary](#summary)
 
 
 ## `create_matrix`
 
-This function create a matrix with the given parameters: `size_t number_of_dimensions, size_t* dimensions, DataType data_type`.
+This function create a matrix with the given parameters:
 
 - `size_t number_of_dimensions`: The „depth” of the matrix
 - `size_t* dimensions`: The amount of the elements of every dimension
@@ -55,7 +63,7 @@ clear_matrix(matrix);
 
 With this function, you're able to get a specific element in a given matrix.
 
-The required parameters are: `MultiDimensionalMatrix* matrix, size_t* indices`
+The required parameters are:
 
 - `MultiDimensionalMatrix* matrix`: The given matrix
 - `size_t* indices`: The „coordinates” to the requested element in the matrix
@@ -90,7 +98,7 @@ clear_matrix(matrix);
 
 With this function, you're able to set/modify a specific element in a given matrix.
 
-The required parameters are: `MultiDimensionalMatrix* matrix, size_t* indices, void* value`
+The required parameters are:
 
 - `MultiDimensionalMatrix* matrix`: *See description at [get_element_by_indices](#get_element_by_indices)*
 - `size_t* indices`: *See description at [get_element_by_indices](#get_element_by_indices)*
@@ -126,10 +134,75 @@ if (resp_code != ERR_NONE) {
 clear_matrix(matrix); 
 ```
 
+## `fill_matrix_from_static_array`
+
+This function is able to copy the values of a static-array into a given matrix.
+
+The required parameters are:
+
+- `MultiDimensionalMatrix* matrix`: *See description at [get_element_by_indices](#get_element_by_indices)*
+- `void* static_array`: The given static-array
+- `size_t* static_dimensions`: The amount of the elements of every dimension (has to be the same dimensions as the used dimensions-array while creating the matrix)
+- `size_t number_of_dimensions`: The amount of dimensions of the static-array
+- `DataType data_type`: *See description at [create_matrix](#create_matrix)*
+
+The function returns a custom __ErrorCode__, which should be __ERR_NONE__ if no error occured.
+
+### Usage & Example
+
+```C
+// size_t dimensions[] = {2, 2, 2};
+// Matrix created successfully
+
+int static_array[2][2][2] = {
+  {
+    {1, 2},
+    {3, 4}
+  },
+
+  {
+    {5, 6},
+    {7, 8}
+  }
+};
+
+ErrorCode response = fill_matrix_from_static_array(matrix, (void*)static_array, dimensions, 3, TYPE_INT);
+
+if (response == ERR_NONE) {
+  // printout the matrix
+  size_t indices[3];
+  void* element;
+
+  for (size_t i = 0; i < 2; i++) {
+    for (size_t j = 0; j < 2; j++) {
+      for (size_t k = 0; k < 2; k++) {
+        indices[0] = i;
+        indices[1] = j;
+        indices[2] = k;
+
+        element = get_element_by_indices(matrix, indices);
+        
+        if (!element) { 
+          printf("Couldn't get element at matrix[%ld][%ld][%ld]\n",i,j,k);
+          break;
+        }
+
+        printf("matrix[%ld][%ld][%ld]=%d\n",i,j,k,*(int*)element);
+      }
+    }
+  }
+} else {
+  printf("THIS IS FINE.\n");
+}
+
+// Clear the allocated space
+clear_matrix(matrix); 
+```
+
 
 ## `add_matrices`
 
-With this function, you're able to add two given matrices.
+With this function, you can calculate the sum of two matrices.
 
 The required parameters are: `const MultiDimensionalMatrix* matrix_A, const MultiDimensionalMatrix* matrix_B`
 
@@ -175,3 +248,215 @@ clear_matrix(matrixA);
 clear_matrix(matrixB);
 clear_matrix(response.result_matrix);
 ```
+
+
+## `multiply_2d_matrices`
+
+Multiply two given 2-Dimensional matrices.
+
+The required parameters are: `const MultiDimensionalMatrix* matrix_A, const MultiDimensionalMatrix* matrix_B`
+
+The function returns an __ArithmeticOperationReturn__-struct, which contains both, the pointer to the result-matrix and an `ErrorCode`.
+If something went wrong, the function should return the __NULL-Pointer__ as the result-matrix and an accordingly __ErrorCode__.
+
+### Important Note
+
+Currently, the following calculation block is redundant and repeated for each data type in the code:
+
+```C
+for (size_t i = 0; i < rows_A; i++) {
+  for (size_t j = 0; j < cols_B; j++) {
+    int_result[i * cols_B + j] = 0; // Initialize result element
+    for (size_t k = 0; k < cols_A; k++) {
+        int_result[i * cols_B + j] += int_dataA[i * cols_A + k] * int_dataB[k * cols_B + j];
+    }
+  }
+}
+```
+
+However, I haven't found a way to implement these calculations generically for all supported data types. The current implementation repeats the block for each data type (int, float, double), which is not ideal.
+
+### Usage & Example
+
+```C
+// size_t dimensionsA[] = {2, 2};
+// size_t dimensionsB[] = {2, 2};
+// `matrixA` & `matrixB` created successfully
+
+int static_array[2][2] = {
+  {1, 2},
+  {3, 4}
+};
+
+ErrorCode response = fill_matrix_from_static_array(matrix_A, (void*)static_array, dimensions, 2, TYPE_INT);
+
+if (response != ERR_NONE) {
+  printf("THIS IS FINE.\n");
+  clear_matrix(matrix_A);
+  return 1;
+} 
+
+// printout the matrix
+size_t indices[3];
+void* element;
+
+for (size_t i = 0; i < 2; i++) {
+  for (size_t j = 0; j < 2; j++) {
+    indices[0] = i;
+    indices[1] = j;
+
+    element = get_element_by_indices(matrix_A, indices);
+    
+    if (!element) {
+      printf("Couldn't get element at matrix_A[%ld][%ld]\n",i,j);
+      break;
+    }
+
+  printf("matrix_A[%ld][%ld]=%d\n",i,j,*(int*)element);
+  }
+}
+
+int _static_array[2][2] = {
+  {5, 6},
+  {7, 8}
+};
+
+response = fill_matrix_from_static_array(matrix_B, (void*)_static_array, dimensions, 2, TYPE_INT);
+
+if (response != ERR_NONE) {
+  printf("THIS IS FINE.\n");
+  clear_matrix(matrix_A);
+  clear_matrix(matrix_B);
+  return 1;
+} 
+
+// printout the matrix
+
+for (size_t i = 0; i < 2; i++) {
+  for (size_t j = 0; j < 2; j++) {
+    indices[0] = i;
+    indices[1] = j;
+
+    element = get_element_by_indices(matrix_B, indices);
+    
+    if (!element) {
+      printf("Couldn't get element at matrix_B[%ld][%ld]\n",i,j);
+      break;
+    }
+
+    printf("matrix_B[%ld][%ld]=%d\n",i,j,*(int*)element);
+  }
+}
+
+ArithmeticOperationReturn operation_resp = multiply_2d_matrices(matrix_A, matrix_B);
+
+if (operation_resp.error_code != ERR_NONE) {
+  printf("THIS IS FINE.\n");
+  clear_matrix(matrix_A);
+  clear_matrix(matrix_B);
+  return 1;
+}
+
+printf("Calculated the matrices-product of matrix_A and matrix_B\n");
+
+// printout the matrix
+
+MultiDimensionalMatrix* result_matrix = operation_resp.result_matrix;
+
+for (size_t i = 0; i < 2; i++) {
+  for (size_t j = 0; j < 2; j++) {
+    indices[0] = i;
+    indices[1] = j;
+
+    element = get_element_by_indices(result_matrix, indices);
+    
+    if (!element) {
+      printf("Couldn't get element at result_matrix[%ld][%ld]\n",i,j);
+      break;
+    }
+
+    printf("result_matrix[%ld][%ld]=%d\n",i,j,*(int*)element);
+  }
+}
+
+// Clear the allocated space
+clear_matrix(matrix_A);
+clear_matrix(matrix_B);
+clear_matrix(result_matrix);
+```
+
+## `scalar_multiply_matrix`
+
+Multiply each element of the matrix with a scalar.
+
+The required parameters are:
+
+- `const MultiDimensionalMatrix* matrix`: The given matrix
+- `void* scalar`: The scalar with which the elements of the matrix are to be multiplied
+- `DataType data_type`: The data-type of the given scalar (__probably unnecessary__)
+
+The function returns an __ArithmeticOperationReturn__-struct, which contains both, the pointer to the result-matrix and an `ErrorCode`.
+If something went wrong, the function should return the __NULL-Pointer__ as the result-matrix and an accordingly __ErrorCode__.
+
+### Usage & Example
+
+```C
+// size_t dimensions[] = {2, 2};
+// `matrixA` created successfully
+
+int static_array[2][2] = {
+  {1, 2},
+  {3, 4}
+};
+
+ErrorCode response = fill_matrix_from_static_array(matrix, (void*)static_array, dimensions, 2, TYPE_INT);
+
+if (response != ERR_NONE) {
+  printf("THIS IS FINE.\n");
+  clear_matrix(matrix);
+  return 1;
+} 
+
+printf("Filled the matrix\n");
+
+int scalar = 2;
+
+ArithmeticOperationReturn arith_resp = scalar_multiply_matrix(matrix,(void*)&scalar,TYPE_INT);
+
+if (arith_resp.error_code != ERR_NONE) {
+  printf("THIS IS FINE.\n");
+  clear_matrix(matrix);
+  return 1;
+}
+
+MultiDimensionalMatrix* result_matrix = arith_resp.result_matrix;
+
+// printout the matrix
+size_t indices[2];
+void* element;
+
+for (size_t i = 0; i < 2; i++) {
+  for (size_t j = 0; j < 2; j++) {
+    indices[0] = i;
+    indices[1] = j;
+
+    element = get_element_by_indices(result_matrix, indices);
+    
+    if (!element) {
+      printf("Couldn't get element at result_matrix[%ld][%ld]\n",i,j);
+      break;
+    }
+
+    printf("matrix[%ld][%ld]=%d\n",i,j,*(int*)element);
+  }
+}
+
+// Clear the allocated space
+clear_matrix(matrix);
+clear_matrix(result_matrix);
+```
+
+
+## Summary
+
+I wanted to add that currently a few function parameters are probably superfluous, such as the multiple specification of the dimensions of a matrix, or the multiple specification of data types, although only the data type of the elements of the matrix are accepted anyway.
