@@ -407,7 +407,7 @@ int static_array[2][2] = {
   {3, 4}
 };
 
-ErrorCode response = fill_matrix_from_static_array(matrix, (void*)static_array, dimensions, 2, TYPE_INT);
+ErrorCode response = fill_matrix_from_static_array(matrix, (void*)static_array, dimensions, 2);
 
 if (response != ERR_NONE) {
   printf("THIS IS FINE.\n");
