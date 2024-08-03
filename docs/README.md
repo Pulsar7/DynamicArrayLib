@@ -32,7 +32,7 @@ Documentation: [DynamicArrays-README.md](./DynamicArrays-README.md)
 - Retrieve an element from a matrix by its indices
 - Calculate the sum of two multidimensional matrices
 - Fill a matrix with a static array
-- (Calculate the product of two 2-Dimensional matrices) - __in development__
+- Calculate the product of two 2-Dimensional matrices
 
 
 Documentation: [MultiDimensionalMatrices-README.md](./MultiDimensionalMatrices-README.md)
