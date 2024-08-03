@@ -277,7 +277,7 @@
         }
     };
 
-    ErrorCode response = fill_matrix_from_static_array(matrix, (void*)static_array, dimensions, 3, TYPE_INT);
+    ErrorCode response = fill_matrix_from_static_array(matrix, (void*)static_array, dimensions, 3);
 
     if (response == ERR_NONE) {
         // printout the matrix
@@ -330,7 +330,7 @@
         {3, 4}
     };
 
-    ErrorCode response = fill_matrix_from_static_array(matrix_A, (void*)static_array, dimensions, 2, TYPE_INT);
+    ErrorCode response = fill_matrix_from_static_array(matrix_A, (void*)static_array, dimensions, 2);
 
     if (response != ERR_NONE) {
         printf("THIS IS FINE.\n");
@@ -373,7 +373,7 @@
         {7, 8}
     };
 
-    response = fill_matrix_from_static_array(matrix_B, (void*)_static_array, dimensions, 2, TYPE_INT);
+    response = fill_matrix_from_static_array(matrix_B, (void*)_static_array, dimensions, 2);
 
     if (response != ERR_NONE) {
         printf("THIS IS FINE.\n");
@@ -459,7 +459,7 @@ int main(int argc, const char** argv) {
         {3, 4}
     };
 
-    ErrorCode response = fill_matrix_from_static_array(matrix, (void*)static_array, dimensions, 2, TYPE_INT);
+    ErrorCode response = fill_matrix_from_static_array(matrix, (void*)static_array, dimensions, 2);
 
     if (response != ERR_NONE) {
         printf("THIS IS FINE.\n");
@@ -471,7 +471,7 @@ int main(int argc, const char** argv) {
 
     int scalar = 2;
 
-    ArithmeticOperationReturn arith_resp = scalar_multiply_matrix(matrix,(void*)&scalar,TYPE_INT);
+    ArithmeticOperationReturn arith_resp = scalar_multiply_matrix(matrix,(void*)&scalar);
 
     if (arith_resp.error_code != ERR_NONE) {
         printf("THIS IS FINE.\n");

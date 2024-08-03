@@ -141,10 +141,9 @@ This function is able to copy the values of a static-array into a given matrix.
 The required parameters are:
 
 - `MultiDimensionalMatrix* matrix`: *See description at [get_element_by_indices](#get_element_by_indices)*
-- `void* static_array`: The given static-array
+- `void* static_array`: The given static-array (must have the same data type as the matrix)
 - `size_t* static_dimensions`: The amount of the elements of every dimension (has to be the same dimensions as the used dimensions-array while creating the matrix)
 - `size_t number_of_dimensions`: The amount of dimensions of the static-array
-- `DataType data_type`: *See description at [create_matrix](#create_matrix)*
 
 The function returns a custom __ErrorCode__, which should be __ERR_NONE__ if no error occured.
 
@@ -166,7 +165,7 @@ int static_array[2][2][2] = {
   }
 };
 
-ErrorCode response = fill_matrix_from_static_array(matrix, (void*)static_array, dimensions, 3, TYPE_INT);
+ErrorCode response = fill_matrix_from_static_array(matrix, (void*)static_array, dimensions, 3);
 
 if (response == ERR_NONE) {
   // printout the matrix
@@ -288,7 +287,7 @@ int static_array[2][2] = {
   {3, 4}
 };
 
-ErrorCode response = fill_matrix_from_static_array(matrix_A, (void*)static_array, dimensions, 2, TYPE_INT);
+ErrorCode response = fill_matrix_from_static_array(matrix_A, (void*)static_array, dimensions, 2);
 
 if (response != ERR_NONE) {
   printf("THIS IS FINE.\n");
@@ -321,7 +320,7 @@ int _static_array[2][2] = {
   {7, 8}
 };
 
-response = fill_matrix_from_static_array(matrix_B, (void*)_static_array, dimensions, 2, TYPE_INT);
+response = fill_matrix_from_static_array(matrix_B, (void*)_static_array, dimensions, 2);
 
 if (response != ERR_NONE) {
   printf("THIS IS FINE.\n");
@@ -393,7 +392,6 @@ The required parameters are:
 
 - `const MultiDimensionalMatrix* matrix`: The given matrix
 - `void* scalar`: The scalar with which the elements of the matrix are to be multiplied
-- `DataType data_type`: The data-type of the given scalar (__probably unnecessary__)
 
 The function returns an __ArithmeticOperationReturn__-struct, which contains both, the pointer to the result-matrix and an `ErrorCode`.
 If something went wrong, the function should return the __NULL-Pointer__ as the result-matrix and an accordingly __ErrorCode__.
@@ -421,7 +419,7 @@ printf("Filled the matrix\n");
 
 int scalar = 2;
 
-ArithmeticOperationReturn arith_resp = scalar_multiply_matrix(matrix,(void*)&scalar,TYPE_INT);
+ArithmeticOperationReturn arith_resp = scalar_multiply_matrix(matrix,(void*)&scalar);
 
 if (arith_resp.error_code != ERR_NONE) {
   printf("THIS IS FINE.\n");

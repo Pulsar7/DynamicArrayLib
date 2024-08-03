@@ -279,7 +279,7 @@ static ErrorCode set_element_by_linear_index(MultiDimensionalMatrix* matrix, siz
 }
 
 
-ErrorCode fill_matrix_from_static_array(MultiDimensionalMatrix* matrix, void* static_array, size_t* static_dimensions, size_t number_of_dimensions, DataType data_type) {
+ErrorCode fill_matrix_from_static_array(MultiDimensionalMatrix* matrix, void* static_array, size_t* static_dimensions, size_t number_of_dimensions) {
     /*
     
         Fill a given matrix with a static-array
@@ -293,12 +293,6 @@ ErrorCode fill_matrix_from_static_array(MultiDimensionalMatrix* matrix, void* st
         return ERR_NULL_PTR;
     }
 
-    // Check data type
-    if (matrix->data_type != data_type) {
-        // Matrix-data-type is not the same as the given static-array data-type
-        return ERR_INVALID_ARGS;
-    }
-
     // Check dimensions
     if (matrix->number_of_dimensions != number_of_dimensions) {
         // Dimension mismatch
@@ -308,7 +302,7 @@ ErrorCode fill_matrix_from_static_array(MultiDimensionalMatrix* matrix, void* st
     // Determine the size of each element
     size_t element_size = 0;
 
-    switch (data_type) {
+    switch (matrix->data_type) {
         case TYPE_INT:
             element_size = sizeof(int);
             break;
@@ -569,7 +563,7 @@ ArithmeticOperationReturn multiply_2d_matrices(const MultiDimensionalMatrix* mat
 }
 
 
-ArithmeticOperationReturn scalar_multiply_matrix(const MultiDimensionalMatrix* matrix, void* scalar, DataType data_type) {
+ArithmeticOperationReturn scalar_multiply_matrix(const MultiDimensionalMatrix* matrix, void* scalar) {
     /*
 
         Multiplication of a matrix and a scalar
@@ -589,15 +583,8 @@ ArithmeticOperationReturn scalar_multiply_matrix(const MultiDimensionalMatrix* m
         return response;
     }
 
-    // Check data-type
-    if (matrix->data_type != data_type) {
-        // Mismatch
-        response.error_code = ERR_INVALID_ARGS;
-        return response;
-    }
-
     // Creating the `result_matrix`
-    MultiDimensionalMatrix* result_matrix = create_matrix(matrix->number_of_dimensions, matrix->dimensions, data_type);
+    MultiDimensionalMatrix* result_matrix = create_matrix(matrix->number_of_dimensions, matrix->dimensions, matrix->data_type);
 
     if (!result_matrix) {
         // Couldn't create the `result_matrix`
@@ -609,7 +596,7 @@ ArithmeticOperationReturn scalar_multiply_matrix(const MultiDimensionalMatrix* m
 
     // Iterate through matrix and multiply each element with the scalar
 
-    switch(data_type) {
+    switch(matrix->data_type) {
         case TYPE_INT:
             for (size_t i = 0; i < (matrix->data_size/sizeof(int)); i++) {
                 ((int*)result_matrix->data)[i] = ((int*)matrix->data)[i] * *((int*)scalar);
