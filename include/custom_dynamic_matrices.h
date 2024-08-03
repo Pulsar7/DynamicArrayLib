@@ -46,6 +46,7 @@ static ErrorCode set_element_by_linear_index(MultiDimensionalMatrix* matrix, siz
 ErrorCode fill_matrix_from_static_array(MultiDimensionalMatrix* matrix, void* static_array, size_t* static_dimensions, size_t number_of_dimensions, DataType data_type);
 ArithmeticOperationReturn add_matrices(const MultiDimensionalMatrix* matrix_A, const MultiDimensionalMatrix* matrix_B);
 ArithmeticOperationReturn multiply_2d_matrices(const MultiDimensionalMatrix* matrix_A, const MultiDimensionalMatrix* matrix_B);
+ArithmeticOperationReturn scalar_multiply_matrix(const MultiDimensionalMatrix* matrix, void* scalar, DataType data_type);
 
 
 #endif // CUSTOM_DYNAMIC_MATRICES_H

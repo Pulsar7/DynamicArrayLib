@@ -15,6 +15,9 @@
 - [`multiply_2d_matrices`](#multiply_2d_matrices)
   - [Important Note](#important-note)
   - [Usage \& Example](#usage--example-5)
+- [`scalar_multiply_matrix`](#scalar_multiply_matrix)
+  - [Usage \& Example](#usage--example-6)
+- [Summary](#summary)
 
 
 ## `create_matrix`
@@ -381,3 +384,79 @@ clear_matrix(matrix_A);
 clear_matrix(matrix_B);
 clear_matrix(result_matrix);
 ```
+
+## `scalar_multiply_matrix`
+
+Multiply each element of the matrix with a scalar.
+
+The required parameters are:
+
+- `const MultiDimensionalMatrix* matrix`: The given matrix
+- `void* scalar`: The scalar with which the elements of the matrix are to be multiplied
+- `DataType data_type`: The data-type of the given scalar (__probably unnecessary__)
+
+The function returns an __ArithmeticOperationReturn__-struct, which contains both, the pointer to the result-matrix and an `ErrorCode`.
+If something went wrong, the function should return the __NULL-Pointer__ as the result-matrix and an accordingly __ErrorCode__.
+
+### Usage & Example
+
+```C
+// size_t dimensions[] = {2, 2};
+// `matrixA` created successfully
+
+int static_array[2][2] = {
+  {1, 2},
+  {3, 4}
+};
+
+ErrorCode response = fill_matrix_from_static_array(matrix, (void*)static_array, dimensions, 2, TYPE_INT);
+
+if (response != ERR_NONE) {
+  printf("THIS IS FINE.\n");
+  clear_matrix(matrix);
+  return 1;
+} 
+
+printf("Filled the matrix\n");
+
+int scalar = 2;
+
+ArithmeticOperationReturn arith_resp = scalar_multiply_matrix(matrix,(void*)&scalar,TYPE_INT);
+
+if (arith_resp.error_code != ERR_NONE) {
+  printf("THIS IS FINE.\n");
+  clear_matrix(matrix);
+  return 1;
+}
+
+MultiDimensionalMatrix* result_matrix = arith_resp.result_matrix;
+
+// printout the matrix
+size_t indices[2];
+void* element;
+
+for (size_t i = 0; i < 2; i++) {
+  for (size_t j = 0; j < 2; j++) {
+    indices[0] = i;
+    indices[1] = j;
+
+    element = get_element_by_indices(result_matrix, indices);
+    
+    if (!element) {
+      printf("Couldn't get element at result_matrix[%ld][%ld]\n",i,j);
+      break;
+    }
+
+    printf("matrix[%ld][%ld]=%d\n",i,j,*(int*)element);
+  }
+}
+
+// Clear the allocated space
+clear_matrix(matrix);
+clear_matrix(result_matrix);
+```
+
+
+## Summary
+
+I wanted to add that currently a few function parameters are probably superfluous, such as the multiple specification of the dimensions of a matrix, or the multiple specification of data types, although only the data type of the elements of the matrix are accepted anyway.

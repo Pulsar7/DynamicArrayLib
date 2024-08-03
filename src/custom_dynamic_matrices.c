@@ -568,3 +568,74 @@ ArithmeticOperationReturn multiply_2d_matrices(const MultiDimensionalMatrix* mat
     return response;
 }
 
+
+ArithmeticOperationReturn scalar_multiply_matrix(const MultiDimensionalMatrix* matrix, void* scalar, DataType data_type) {
+    /*
+
+        Multiplication of a matrix and a scalar
+
+        Returns a custom-defined `ArithmeticOperationReturn`-struct, which contains the result-matrix (NULL-Pointer if an error occured)
+        and an `ErrorCode`.
+
+    */
+
+    ArithmeticOperationReturn response;
+    response.error_code = ERR_NONE;
+    response.result_matrix = NULL;
+
+    if (!matrix || !scalar) {
+        // Wether `matrix_A` or `matrix_B` is a NULL-Pointer
+        response.error_code = ERR_NULL_PTR;
+        return response;
+    }
+
+    // Check data-type
+    if (matrix->data_type != data_type) {
+        // Mismatch
+        response.error_code = ERR_INVALID_ARGS;
+        return response;
+    }
+
+    // Creating the `result_matrix`
+    MultiDimensionalMatrix* result_matrix = create_matrix(matrix->number_of_dimensions, matrix->dimensions, data_type);
+
+    if (!result_matrix) {
+        // Couldn't create the `result_matrix`
+        response.error_code = ERR_UNKNOWN;
+        return response;
+    }
+
+    response.result_matrix = result_matrix;
+
+    // Iterate through matrix and multiply each element with the scalar
+
+    switch(data_type) {
+        case TYPE_INT:
+            for (size_t i = 0; i < (matrix->data_size/sizeof(int)); i++) {
+                ((int*)result_matrix->data)[i] = ((int*)matrix->data)[i] * *((int*)scalar);
+            }
+            break;
+        
+        case TYPE_FLOAT:
+            for (size_t i = 0; i < (matrix->data_size/sizeof(float)); i++) {
+                ((float*)result_matrix->data)[i] = ((float*)matrix->data)[i] * *((float*)scalar);
+            }
+            break;
+        
+        case TYPE_DOUBLE:
+            for (size_t i = 0; i < (matrix->data_size/sizeof(double)); i++) {
+                ((double*)result_matrix->data)[i] = ((double*)matrix->data)[i] * *((double*)scalar);
+            }
+            break;
+        
+        default:
+            // Unsupported Data_Type
+            // This section shouldn't be reached
+            response.error_code = ERR_UNKNOWN;
+            clear_matrix(result_matrix);
+            return response;
+    }
+    
+
+    return response;
+}

@@ -312,7 +312,7 @@
     return 0;
 }*/
 
-int main(int argc, const char** argv) {
+/*int main(int argc, const char** argv) {
     size_t dimensions[] = {2, 2};
 
     MultiDimensionalMatrix* matrix_A = create_matrix(2,dimensions,TYPE_INT);
@@ -434,6 +434,76 @@ int main(int argc, const char** argv) {
     // Clear the allocated space
     clear_matrix(matrix_A);
     clear_matrix(matrix_B);
+
+    return 0;
+}*/
+
+
+
+
+int main(int argc, const char** argv) {
+    size_t dimensions[] = {2, 2};
+
+    MultiDimensionalMatrix* matrix = create_matrix(2,dimensions,TYPE_INT);
+
+    if (!matrix) {
+        printf("Couldn't create matrix\n");
+        return 1;
+    }
+
+    printf("Created the matrix\n");
+
+
+    int static_array[2][2] = {
+        {1, 2},
+        {3, 4}
+    };
+
+    ErrorCode response = fill_matrix_from_static_array(matrix, (void*)static_array, dimensions, 2, TYPE_INT);
+
+    if (response != ERR_NONE) {
+        printf("THIS IS FINE.\n");
+        clear_matrix(matrix);
+        return 1;
+    } 
+
+    printf("Filled the matrix\n");
+
+    int scalar = 2;
+
+    ArithmeticOperationReturn arith_resp = scalar_multiply_matrix(matrix,(void*)&scalar,TYPE_INT);
+
+    if (arith_resp.error_code != ERR_NONE) {
+        printf("THIS IS FINE.\n");
+        clear_matrix(matrix);
+        return 1;
+    }
+
+    MultiDimensionalMatrix* result_matrix = arith_resp.result_matrix;
+
+    // printout the matrix
+    size_t indices[2];
+    void* element;
+
+    for (size_t i = 0; i < 2; i++) {
+        for (size_t j = 0; j < 2; j++) {
+            indices[0] = i;
+            indices[1] = j;
+
+            element = get_element_by_indices(result_matrix, indices);
+            
+            if (!element) {
+                printf("Couldn't get element at result_matrix[%ld][%ld]\n",i,j);
+                break;
+            }
+
+            printf("matrix[%ld][%ld]=%d\n",i,j,*(int*)element);
+        }
+    }
+
+    // Clear the allocated space
+    clear_matrix(matrix);
+    clear_matrix(result_matrix);
 
     return 0;
 }
