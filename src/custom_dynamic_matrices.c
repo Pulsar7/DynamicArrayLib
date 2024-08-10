@@ -1,43 +1,44 @@
 #include "custom_dynamic_matrices.h"
 
 
-MultiDimensionalMatrix* create_matrix(size_t number_of_dimensions, size_t* dimensions, DataType data_type) {
+ErrorCode create_matrix(MultiDimensionalMatrix* matrix, size_t number_of_dimensions, size_t* dimensions, DataType data_type) {
     /*
         Create a multidimensional matrix
 
-        Returns the matrix as a pointer
-        Returns a NULL-Pointer if an error occured
+        Returns a custom defined ErrorCode, which should be `ERR_NONE` if no error occured.
     */
 
     if (number_of_dimensions == 0) {
-        return NULL;
+        return ERR_INVALID_ARGS;
     }
 
-    if (!dimensions) {
-        // No dimensions given
-        return NULL;
+    if (!dimensions || !matrix) {
+        // No dimension/matrix given
+        return ERR_NULL_PTR;
     }
 
     // Allocate space for the Matrix-Node itself
-    MultiDimensionalMatrix* matrix = (MultiDimensionalMatrix*) malloc(sizeof(MultiDimensionalMatrix));
+    MultiDimensionalMatrixNode* head_ptr = (MultiDimensionalMatrixNode*) malloc(sizeof(MultiDimensionalMatrixNode));
 
-    if (!matrix) {
+    if (!head_ptr) {
         // Allocation-Error
-        return NULL;
+        return ERR_MALLOC_FAILED;
     }
 
-    matrix->number_of_dimensions = number_of_dimensions;
+    matrix->head_ptr = head_ptr;
+
+    head_ptr->number_of_dimensions = number_of_dimensions;
 
     // Allocate space for the dimensions-array
-    matrix->dimensions = (size_t*) malloc(number_of_dimensions * sizeof(size_t));
+    head_ptr->dimensions = (size_t*) malloc(number_of_dimensions * sizeof(size_t));
 
-    if (!matrix->dimensions) {
+    if (!head_ptr->dimensions) {
         // Allocation-Error
-        free(matrix);
-        return NULL;
+        clear_matrix(matrix);
+        return ERR_MALLOC_FAILED;
     }
 
-    memcpy(matrix->dimensions, dimensions, number_of_dimensions * sizeof(size_t));
+    memcpy(head_ptr->dimensions, dimensions, number_of_dimensions * sizeof(size_t));
 
     // Get total size of dimensions
     size_t total_size = 1;
@@ -48,38 +49,37 @@ MultiDimensionalMatrix* create_matrix(size_t number_of_dimensions, size_t* dimen
 
     switch(data_type) {
         case TYPE_INT:
-            matrix->data = malloc(total_size * sizeof(int));
-            matrix->data_size = total_size * sizeof(int);
+            head_ptr->data = malloc(total_size * sizeof(int));
+            head_ptr->data_size = total_size * sizeof(int);
             break;
         
         case TYPE_FLOAT:
-            matrix->data = malloc(total_size * sizeof(float));
-            matrix->data_size = total_size * sizeof(float);
+            head_ptr->data = malloc(total_size * sizeof(float));
+            head_ptr->data_size = total_size * sizeof(float);
             break;
 
         case TYPE_DOUBLE:
-            matrix->data = malloc(total_size * sizeof(double));
-            matrix->data_size = total_size * sizeof(double);
+            head_ptr->data = malloc(total_size * sizeof(double));
+            head_ptr->data_size = total_size * sizeof(double);
             break;
 
         default:
             // Should be unreachable
             // Not supported Data-Type
-            matrix->data = NULL;
+            head_ptr->data = NULL;
             break;
     }
 
-    if (!matrix->data) {
+    if (!head_ptr->data) {
         // Allocation-Error or invalid Data-Type
-        free(matrix->dimensions);
-        free(matrix);
-        return NULL;
+        clear_matrix(matrix);
+        return ERR_MALLOC_FAILED;
     }
 
-    matrix->data_type = data_type;
+    head_ptr->data_type = data_type;
 
     // Operation was successful
-    return matrix;
+    return ERR_NONE;
 }
 
 
@@ -88,20 +88,23 @@ void clear_matrix(MultiDimensionalMatrix* matrix) {
         Free all allocated space
     */
 
-    if (!matrix) {
+    if (!matrix->head_ptr) {
         // Invalid matrix
         return;
     }
 
-    if (matrix->data) {
-        free(matrix->data);
+    if (matrix->head_ptr->data) {
+        free(matrix->head_ptr->data);
+        matrix->head_ptr->data = NULL;
     }
 
-    if (matrix->dimensions) {
-        free(matrix->dimensions);
+    if (matrix->head_ptr->dimensions) {
+        free(matrix->head_ptr->dimensions);
+        matrix->head_ptr->dimensions = NULL;
     }
 
-    free(matrix);
+    free(matrix->head_ptr);
+    matrix->head_ptr = NULL;
 
     return;
 }
@@ -116,7 +119,7 @@ static IndexCalcReturn calc_index(MultiDimensionalMatrix* matrix, size_t* indice
 
     IndexCalcReturn return_data;
 
-    if (!indices || !matrix) {
+    if (!indices || !matrix || !matrix->head_ptr) {
         // No indices given or matrix does not exist
         return_data.error_code = ERR_INVALID_ARGS;
         return return_data;
@@ -139,9 +142,9 @@ static IndexCalcReturn calc_index(MultiDimensionalMatrix* matrix, size_t* indice
     
     */
 
-    for (int i = matrix->number_of_dimensions - 1; i >= 0; --i) {
+    for (int i = matrix->head_ptr->number_of_dimensions - 1; i >= 0; --i) {
         index += indices[i] * offset;
-        offset *= matrix->dimensions[i];
+        offset *= matrix->head_ptr->dimensions[i];
     }
 
     return_data.error_code = ERR_NONE;
@@ -158,7 +161,7 @@ void* get_element_by_indices(MultiDimensionalMatrix* matrix, size_t* indices) {
         Returns a NULL-Pointer if something went wrong.
     */
 
-    if (!matrix || !indices) {
+    if (!matrix || !indices || !matrix->head_ptr) {
         // Matrix does not exist or no indices are given
         return NULL;
     }
@@ -175,26 +178,26 @@ void* get_element_by_indices(MultiDimensionalMatrix* matrix, size_t* indices) {
     
     // Check if calculated index is out of bounds
     // And return requested value if index is valid
-    switch(matrix->data_type) {
+    switch(matrix->head_ptr->data_type) {
         case TYPE_INT:
-            if (index >= matrix->data_size / sizeof(int)) {
+            if (index >= matrix->head_ptr->data_size / sizeof(int)) {
                 return NULL;
             }
-            return (void*)((int*)matrix->data + index);
+            return (void*)((int*)matrix->head_ptr->data + index);
             break; // Unreachable?
 
         case TYPE_FLOAT:
-            if (index >= matrix->data_size / sizeof(float)) {
+            if (index >= matrix->head_ptr->data_size / sizeof(float)) {
                 return NULL;
             }
-            return (void*)((float*)matrix->data + index);
+            return (void*)((float*)matrix->head_ptr->data + index);
             break; // Unreachable?
         
         case TYPE_DOUBLE:
-            if (index >= matrix->data_size / sizeof(double)) {
+            if (index >= matrix->head_ptr->data_size / sizeof(double)) {
                 return NULL;
             }
-            return (void*)((double*)matrix->data + index);
+            return (void*)((double*)matrix->head_ptr->data + index);
             break; // Unreachable?
 
         default:
@@ -207,6 +210,52 @@ void* get_element_by_indices(MultiDimensionalMatrix* matrix, size_t* indices) {
     return NULL;
 }
 
+static ErrorCode set_element_by_linear_index(MultiDimensionalMatrix* matrix, size_t index, void* value) {
+    /*
+        Set an element at the given position, but by its flat/linear index in the struct.
+
+        Returns a custom `ErrorCode`
+    */
+
+    if (!matrix || !value || !matrix->head_ptr) {
+        // One or both of matrix and value are the NULL-Pointer
+        return ERR_NULL_PTR;
+    }
+
+    // Check if calculated index is out of bounds
+    // Modifies the element with this index
+    switch(matrix->head_ptr->data_type) {
+        case TYPE_INT:
+            if (index >= matrix->head_ptr->data_size / sizeof(int)) {
+                return ERR_INVALID_INDEX;
+            }
+            ((int*)matrix->head_ptr->data)[index] = *(int*)value;
+            break;
+
+        case TYPE_FLOAT:
+            if (index >= matrix->head_ptr->data_size / sizeof(float)) {
+                return ERR_INVALID_INDEX;
+            }
+            ((float*)matrix->head_ptr->data)[index] = *(float*)value;
+            break;
+        
+        case TYPE_DOUBLE:
+            if (index >= matrix->head_ptr->data_size / sizeof(double)) {
+                return ERR_INVALID_INDEX;
+            }
+            ((double*)matrix->head_ptr->data)[index] = *(double*)value;
+            break;
+
+        default:
+            // Unsupported Data-Type
+            // Unreachable?
+            return ERR_INVALID_ARGS;
+    }
+
+    return ERR_NONE;
+
+}
+
 ErrorCode set_element_by_indices(MultiDimensionalMatrix* matrix, size_t* indices, void* value) {
     /*
         Set an element at the given position (indices)
@@ -214,7 +263,7 @@ ErrorCode set_element_by_indices(MultiDimensionalMatrix* matrix, size_t* indices
         Returns a custom `ErrorCode`
     */
 
-    if (!matrix || !indices) {
+    if (!matrix || !indices || !matrix->head_ptr) {
         // Matrix/value/indices does not exist
         return ERR_NULL_PTR;
     }
@@ -232,77 +281,27 @@ ErrorCode set_element_by_indices(MultiDimensionalMatrix* matrix, size_t* indices
     return set_element_by_linear_index(matrix, index, value);
 }
 
-static ErrorCode set_element_by_linear_index(MultiDimensionalMatrix* matrix, size_t index, void* value) {
-    /*
-        Set an element at the given position, but by its flat/linear index in the struct.
 
-        Returns a custom `ErrorCode`
-    */
-
-    if (!matrix || !value) {
-        // One or both of matrix and value are the NULL-Pointer
-        return ERR_NULL_PTR;
-    }
-
-    // Check if calculated index is out of bounds
-    // Modifies the element with this index
-    switch(matrix->data_type) {
-        case TYPE_INT:
-            if (index >= matrix->data_size / sizeof(int)) {
-                return ERR_INVALID_INDEX;
-            }
-            ((int*)matrix->data)[index] = *(int*)value;
-            break;
-
-        case TYPE_FLOAT:
-            if (index >= matrix->data_size / sizeof(float)) {
-                return ERR_INVALID_INDEX;
-            }
-            ((float*)matrix->data)[index] = *(float*)value;
-            break;
-        
-        case TYPE_DOUBLE:
-            if (index >= matrix->data_size / sizeof(double)) {
-                return ERR_INVALID_INDEX;
-            }
-            ((double*)matrix->data)[index] = *(double*)value;
-            break;
-
-        default:
-            // Unsupported Data-Type
-            // Unreachable?
-            return ERR_INVALID_ARGS;
-    }
-
-    return ERR_NONE;
-
-}
-
-
-ErrorCode fill_matrix_from_static_array(MultiDimensionalMatrix* matrix, void* static_array, size_t* static_dimensions, size_t number_of_dimensions) {
+ErrorCode fill_matrix_from_static_array(MultiDimensionalMatrix* matrix, void* static_array) {
     /*
     
         Fill a given matrix with a static-array
+
+        Assuming, that the given dimensions of the static-array are the same as of the matrix
 
         Returns a custom `ErrorCode` (should be `ERR_NONE` if no error occured)
 
     */
 
-    if (!matrix || !static_array || !static_dimensions) {
+    if (!matrix || !static_array || !matrix->head_ptr) {
         // NULL-Pointer
         return ERR_NULL_PTR;
-    }
-
-    // Check dimensions
-    if (matrix->number_of_dimensions != number_of_dimensions) {
-        // Dimension mismatch
-        return ERR_INVALID_ARGS;
     }
 
     // Determine the size of each element
     size_t element_size = 0;
 
-    switch (matrix->data_type) {
+    switch (matrix->head_ptr->data_type) {
         case TYPE_INT:
             element_size = sizeof(int);
             break;
@@ -318,7 +317,7 @@ ErrorCode fill_matrix_from_static_array(MultiDimensionalMatrix* matrix, void* st
             return ERR_UNKNOWN;
     }
 
-    size_t total_size = matrix->data_size / element_size;
+    size_t total_size = matrix->head_ptr->data_size / element_size;
 
     // Iterate through the array
     void* this_element;
@@ -356,24 +355,23 @@ ArithmeticOperationReturn add_matrices(const MultiDimensionalMatrix* matrix_A, c
     */
 
     ArithmeticOperationReturn response;
-    response.result_matrix = NULL;
     response.error_code = ERR_NONE;
 
-    if (!matrix_A || !matrix_B) {
+    if (!matrix_A || !matrix_B || !matrix_A->head_ptr || !matrix_B->head_ptr) {
         // Wether `matrix_A` or `matrix_B` (or both) is a NULL-Pointer
         response.error_code = ERR_NULL_PTR;
         return response;
     }
 
     // Check dimensions
-    if (matrix_A->number_of_dimensions != matrix_B->number_of_dimensions) {
+    if (matrix_A->head_ptr->number_of_dimensions != matrix_B->head_ptr->number_of_dimensions) {
         // Cannot add two matrices with different dimensions
         response.error_code = ERR_INVALID_ARGS;
         return response;
     }
 
-    for (size_t i = 0; i < matrix_A->number_of_dimensions; i++) {
-        if (matrix_A->dimensions[i] != matrix_B->dimensions[i]) {
+    for (size_t i = 0; i < matrix_A->head_ptr->number_of_dimensions; i++) {
+        if (matrix_A->head_ptr->dimensions[i] != matrix_B->head_ptr->dimensions[i]) {
             // Mismatch
             response.error_code = ERR_INVALID_ARGS;
             return response;
@@ -381,18 +379,20 @@ ArithmeticOperationReturn add_matrices(const MultiDimensionalMatrix* matrix_A, c
     }
     
     // Check data_type
-    if (matrix_A->data_type != matrix_B->data_type) {
+    if (matrix_A->head_ptr->data_type != matrix_B->head_ptr->data_type) {
         // Cannot add two matrices with different data-types
         response.error_code = ERR_INVALID_ARGS;
         return response;
     }
 
     // Creating the `result_matrix`
-    MultiDimensionalMatrix* result_matrix = create_matrix(matrix_A->number_of_dimensions, matrix_A->dimensions, matrix_A->data_type);
+    MultiDimensionalMatrix result_matrix;
+    
+    ErrorCode matrix_creation_resp = create_matrix(&result_matrix, matrix_A->head_ptr->number_of_dimensions, matrix_A->head_ptr->dimensions, matrix_A->head_ptr->data_type);
 
-    if (!result_matrix) {
-        // Couldn't create the `result_matrix`
-        response.error_code = ERR_UNKNOWN;
+    if (matrix_creation_resp != ERR_NONE) {
+        // Something went wrong while trying to create the matrix
+        response.error_code = matrix_creation_resp;
         return response;
     }
 
@@ -402,31 +402,31 @@ ArithmeticOperationReturn add_matrices(const MultiDimensionalMatrix* matrix_A, c
     
     size_t total_elements;
 
-    switch(matrix_A->data_type) {
+    switch(matrix_A->head_ptr->data_type) {
         case TYPE_INT:
-            total_elements = matrix_A->data_size / sizeof(int);
-            int* int_dataA = (int*)matrix_A->data;
-            int* int_dataB = (int*)matrix_B->data; 
+            total_elements = matrix_A->head_ptr->data_size / sizeof(int);
+            int* int_dataA = (int*)matrix_A->head_ptr->data;
+            int* int_dataB = (int*)matrix_B->head_ptr->data; 
             for (size_t i = 0; i < total_elements; i++) {
-                ((int*)result_matrix->data)[i] = int_dataA[i] + int_dataB[i];
+                ((int*)result_matrix.head_ptr->data)[i] = int_dataA[i] + int_dataB[i];
             }
             break;
         
         case TYPE_FLOAT:
-            total_elements = matrix_A->data_size / sizeof(float);
-            float* float_dataA = (float*)matrix_A->data;
-            float* float_dataB = (float*)matrix_B->data; 
+            total_elements = matrix_A->head_ptr->data_size / sizeof(float);
+            float* float_dataA = (float*)matrix_A->head_ptr->data;
+            float* float_dataB = (float*)matrix_B->head_ptr->data; 
             for (size_t i = 0; i < total_elements; i++) {
-                ((float*)result_matrix->data)[i] = float_dataA[i] + float_dataB[i];
+                ((float*)result_matrix.head_ptr->data)[i] = float_dataA[i] + float_dataB[i];
             }
             break;
 
         case TYPE_DOUBLE:
-            total_elements = matrix_A->data_size / sizeof(double);
-            double* double_dataA = (double*)matrix_A->data;
-            double* double_dataB = (double*)matrix_B->data; 
+            total_elements = matrix_A->head_ptr->data_size / sizeof(double);
+            double* double_dataA = (double*)matrix_A->head_ptr->data;
+            double* double_dataB = (double*)matrix_B->head_ptr->data; 
             for (size_t i = 0; i < total_elements; i++) {
-                ((double*)result_matrix->data)[i] = double_dataA[i] + double_dataB[i];
+                ((double*)result_matrix.head_ptr->data)[i] = double_dataA[i] + double_dataB[i];
             }
             break;
 
@@ -434,8 +434,7 @@ ArithmeticOperationReturn add_matrices(const MultiDimensionalMatrix* matrix_A, c
             // Unsupported Data_Type
             // This section shouldn't be reached
             response.error_code = ERR_UNKNOWN;
-            clear_matrix(result_matrix);
-            response.result_matrix = NULL; // required?
+            clear_matrix(&result_matrix);
             return response;
     }
 
@@ -454,23 +453,22 @@ ArithmeticOperationReturn multiply_2d_matrices(const MultiDimensionalMatrix* mat
     */
 
     ArithmeticOperationReturn response;
-    response.result_matrix = NULL;
     response.error_code = ERR_NONE;
 
-    if (!matrix_A || !matrix_B) {
+    if (!matrix_A || !matrix_B || !matrix_A->head_ptr || !matrix_B->head_ptr) {
         // Wether `matrix_A` or `matrix_B` is a NULL-Pointer
         response.error_code = ERR_NULL_PTR;
         return response;
     }
 
     // Check dimensions
-    if (matrix_A->number_of_dimensions != 2 || matrix_B->number_of_dimensions != 2) {
+    if (matrix_A->head_ptr->number_of_dimensions != 2 || matrix_B->head_ptr->number_of_dimensions != 2) {
         // The given matrices are not 2-Dimensional
         response.error_code = ERR_INVALID_ARGS;
         return response;
     }
 
-    if (matrix_A->dimensions[1] != matrix_B->dimensions[0]) {
+    if (matrix_A->head_ptr->dimensions[1] != matrix_B->head_ptr->dimensions[0]) {
         // Columns of matrix_A aren't equal to the rows of matrix_B
         response.error_code = ERR_INVALID_ARGS;
         return response;
@@ -478,7 +476,7 @@ ArithmeticOperationReturn multiply_2d_matrices(const MultiDimensionalMatrix* mat
     
 
     // Check data_type
-    if (matrix_A->data_type != matrix_B->data_type) {
+    if (matrix_A->head_ptr->data_type != matrix_B->head_ptr->data_type) {
         // Cannot multiply two matrices with different data-types
         response.error_code = ERR_INVALID_ARGS;
         return response;
@@ -486,13 +484,16 @@ ArithmeticOperationReturn multiply_2d_matrices(const MultiDimensionalMatrix* mat
 
     // Creating the `result_matrix`
     size_t result_matrix_dimensions[] = {
-        matrix_A->dimensions[0], matrix_B->dimensions[1]
+        matrix_A->head_ptr->dimensions[0], matrix_B->head_ptr->dimensions[1]
     };
-    MultiDimensionalMatrix* result_matrix = create_matrix((size_t)2, result_matrix_dimensions, matrix_A->data_type);
 
-    if (!result_matrix) {
-        // Couldn't create the `result_matrix`
-        response.error_code = ERR_UNKNOWN;
+    MultiDimensionalMatrix result_matrix;
+
+    ErrorCode matrix_creation_resp = create_matrix(&result_matrix, (size_t)2, result_matrix_dimensions, matrix_A->head_ptr->data_type);
+
+    if (matrix_creation_resp != ERR_NONE) {
+        // Something went wrong while trying to create the matrix
+        response.error_code = matrix_creation_resp;
         return response;
     }
 
@@ -500,14 +501,14 @@ ArithmeticOperationReturn multiply_2d_matrices(const MultiDimensionalMatrix* mat
 
     // Calculate the product of both matrices
 
-    size_t rows_A = matrix_A->dimensions[0], cols_A = matrix_A->dimensions[1];
-    size_t cols_B = matrix_B->dimensions[1];
+    size_t rows_A = matrix_A->head_ptr->dimensions[0], cols_A = matrix_A->head_ptr->dimensions[1];
+    size_t cols_B = matrix_B->head_ptr->dimensions[1];
 
-    switch(matrix_A->data_type) {
+    switch(matrix_A->head_ptr->data_type) {
         case TYPE_INT:
-            int* int_dataA = (int*)matrix_A->data;
-            int* int_dataB = (int*)matrix_B->data; 
-            int* int_result = (int*)result_matrix->data;
+            int* int_dataA = (int*)matrix_A->head_ptr->data;
+            int* int_dataB = (int*)matrix_B->head_ptr->data; 
+            int* int_result = (int*)result_matrix.head_ptr->data;
 
             for (size_t i = 0; i < rows_A; i++) {
                 for (size_t j = 0; j < cols_B; j++) {
@@ -520,9 +521,9 @@ ArithmeticOperationReturn multiply_2d_matrices(const MultiDimensionalMatrix* mat
             break;
         
         case TYPE_FLOAT:
-            float* float_dataA = (float*)matrix_A->data;
-            float* float_dataB = (float*)matrix_B->data; 
-            float* float_result = (float*)result_matrix->data;
+            float* float_dataA = (float*)matrix_A->head_ptr->data;
+            float* float_dataB = (float*)matrix_B->head_ptr->data; 
+            float* float_result = (float*)result_matrix.head_ptr->data;
 
             for (size_t i = 0; i < rows_A; i++) {
                 for (size_t j = 0; j < cols_B; j++) {
@@ -535,9 +536,9 @@ ArithmeticOperationReturn multiply_2d_matrices(const MultiDimensionalMatrix* mat
             break;
 
         case TYPE_DOUBLE:
-            double* double_dataA = (double*)matrix_A->data;
-            double* double_dataB = (double*)matrix_B->data; 
-            double* double_result = (double*)result_matrix->data;
+            double* double_dataA = (double*)matrix_A->head_ptr->data;
+            double* double_dataB = (double*)matrix_B->head_ptr->data; 
+            double* double_result = (double*)result_matrix.head_ptr->data;
 
             for (size_t i = 0; i < rows_A; i++) {
                 for (size_t j = 0; j < cols_B; j++) {
@@ -553,8 +554,7 @@ ArithmeticOperationReturn multiply_2d_matrices(const MultiDimensionalMatrix* mat
             // Unsupported Data_Type
             // This section shouldn't be reached
             response.error_code = ERR_UNKNOWN;
-            clear_matrix(result_matrix);
-            response.result_matrix = NULL; // required?
+            clear_matrix(&result_matrix);
             return response;
     }
 
@@ -575,20 +575,21 @@ ArithmeticOperationReturn scalar_multiply_matrix(const MultiDimensionalMatrix* m
 
     ArithmeticOperationReturn response;
     response.error_code = ERR_NONE;
-    response.result_matrix = NULL;
 
-    if (!matrix || !scalar) {
-        // Wether `matrix_A` or `matrix_B` is a NULL-Pointer
+    if (!matrix || !scalar || !matrix->head_ptr) {
+        // Wether `matrix` or `scalar` is a NULL-Pointer
         response.error_code = ERR_NULL_PTR;
         return response;
     }
 
     // Creating the `result_matrix`
-    MultiDimensionalMatrix* result_matrix = create_matrix(matrix->number_of_dimensions, matrix->dimensions, matrix->data_type);
+    MultiDimensionalMatrix result_matrix;
 
-    if (!result_matrix) {
-        // Couldn't create the `result_matrix`
-        response.error_code = ERR_UNKNOWN;
+    ErrorCode matrix_creation_resp = create_matrix(&result_matrix,matrix->head_ptr->number_of_dimensions, matrix->head_ptr->dimensions, matrix->head_ptr->data_type);
+
+    if (matrix_creation_resp != ERR_NONE) {
+        // Something went wrong while trying to create the matrix
+        response.error_code = matrix_creation_resp;
         return response;
     }
 
@@ -596,22 +597,22 @@ ArithmeticOperationReturn scalar_multiply_matrix(const MultiDimensionalMatrix* m
 
     // Iterate through matrix and multiply each element with the scalar
 
-    switch(matrix->data_type) {
+    switch(matrix->head_ptr->data_type) {
         case TYPE_INT:
-            for (size_t i = 0; i < (matrix->data_size/sizeof(int)); i++) {
-                ((int*)result_matrix->data)[i] = ((int*)matrix->data)[i] * *((int*)scalar);
+            for (size_t i = 0; i < (matrix->head_ptr->data_size/sizeof(int)); i++) {
+                ((int*)result_matrix.head_ptr->data)[i] = ((int*)matrix->head_ptr->data)[i] * *((int*)scalar);
             }
             break;
         
         case TYPE_FLOAT:
-            for (size_t i = 0; i < (matrix->data_size/sizeof(float)); i++) {
-                ((float*)result_matrix->data)[i] = ((float*)matrix->data)[i] * *((float*)scalar);
+            for (size_t i = 0; i < (matrix->head_ptr->data_size/sizeof(float)); i++) {
+                ((float*)result_matrix.head_ptr->data)[i] = ((float*)matrix->head_ptr->data)[i] * *((float*)scalar);
             }
             break;
         
         case TYPE_DOUBLE:
-            for (size_t i = 0; i < (matrix->data_size/sizeof(double)); i++) {
-                ((double*)result_matrix->data)[i] = ((double*)matrix->data)[i] * *((double*)scalar);
+            for (size_t i = 0; i < (matrix->head_ptr->data_size/sizeof(double)); i++) {
+                ((double*)result_matrix.head_ptr->data)[i] = ((double*)matrix->head_ptr->data)[i] * *((double*)scalar);
             }
             break;
         
@@ -619,7 +620,7 @@ ArithmeticOperationReturn scalar_multiply_matrix(const MultiDimensionalMatrix* m
             // Unsupported Data_Type
             // This section shouldn't be reached
             response.error_code = ERR_UNKNOWN;
-            clear_matrix(result_matrix);
+            clear_matrix(&result_matrix);
             return response;
     }
     

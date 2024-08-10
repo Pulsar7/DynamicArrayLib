@@ -14,13 +14,18 @@ typedef enum DataType {
 } DataType;
 
 
-typedef struct MultiDimensionalMatrix {
+typedef struct MultiDimensionalMatrixNode {
     void* data;
     size_t* dimensions;          // For example 3 x 2 x 2 matrix has the dimensions := {3, 2, 2}
     size_t number_of_dimensions; // `len(dimensions)`
     DataType data_type; 
     size_t data_size;            // Size of the data-array (based on the data-type)
-} MultiDimensionalMatrix;   
+} MultiDimensionalMatrixNode;
+
+typedef struct MultiDimensionalMatrix {
+    MultiDimensionalMatrixNode* head_ptr;
+
+} MultiDimensionalMatrix;
 
 typedef struct IndexCalcReturn {
     size_t index;
@@ -28,7 +33,7 @@ typedef struct IndexCalcReturn {
 } IndexCalcReturn;
 
 typedef struct ArithmeticOperationReturn {
-    MultiDimensionalMatrix* result_matrix;
+    MultiDimensionalMatrix result_matrix;
     ErrorCode error_code;  
 } ArithmeticOperationReturn;
 
@@ -36,13 +41,13 @@ typedef struct ArithmeticOperationReturn {
 
 // Functions
 
-MultiDimensionalMatrix* create_matrix(size_t number_of_dimensions, size_t* dimensions, DataType data_type);
+ErrorCode create_matrix(MultiDimensionalMatrix* matrix, size_t number_of_dimensions, size_t* dimensions, DataType data_type);
 void clear_matrix(MultiDimensionalMatrix* matrix);
-static IndexCalcReturn calc_index(MultiDimensionalMatrix* matrix, size_t* indices);
+//static IndexCalcReturn calc_index(MultiDimensionalMatrix* matrix, size_t* indices);
 void* get_element_by_indices(MultiDimensionalMatrix* matrix, size_t* indices);
 ErrorCode set_element_by_indices(MultiDimensionalMatrix* matrix, size_t* indices, void* value);
-static ErrorCode set_element_by_linear_index(MultiDimensionalMatrix* matrix, size_t index, void* value);
-ErrorCode fill_matrix_from_static_array(MultiDimensionalMatrix* matrix, void* static_array, size_t* static_dimensions, size_t number_of_dimensions);
+//static ErrorCode set_element_by_linear_index(MultiDimensionalMatrix* matrix, size_t index, void* value);
+ErrorCode fill_matrix_from_static_array(MultiDimensionalMatrix* matrix, void* static_array);
 ArithmeticOperationReturn add_matrices(const MultiDimensionalMatrix* matrix_A, const MultiDimensionalMatrix* matrix_B);
 ArithmeticOperationReturn multiply_2d_matrices(const MultiDimensionalMatrix* matrix_A, const MultiDimensionalMatrix* matrix_B);
 ArithmeticOperationReturn scalar_multiply_matrix(const MultiDimensionalMatrix* matrix, void* scalar);
