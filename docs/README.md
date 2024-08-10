@@ -41,11 +41,10 @@ Documentation: [MultiDimensionalMatrices-README.md](./MultiDimensionalMatrices-R
 
 ## Testing
 
-I've written some implementation-examples of this project in __src/main.c__. 
+To test if the given function implementations work, use: 
 
 ```BASH
-make
-./example_main
+make test
 ```
 
 ## Installation
