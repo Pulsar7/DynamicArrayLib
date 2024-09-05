@@ -10,6 +10,8 @@ typedef enum ErrorCode {
     ERR_LIST_EMPTY = 0x04,
     ERR_INVALID_HEAD_PTR = 0x05,
     ERR_INVALID_ARGS = 0x06,
+    ERR_INVALID_TAIL_PTR = 0x07,
+    ERR_REALLOC_FAILED = 0x08,
     ERR_UNKNOWN = 0xFF
 } ErrorCode;
 

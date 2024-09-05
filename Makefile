@@ -16,6 +16,11 @@ TEST_DIR = tests
 TEST_SOURCES = $(wildcard $(TEST_DIR)/*.c)
 TEST_OBJECTS = $(TEST_SOURCES:$(TEST_DIR)/%.c=$(TEST_DIR)/%.o)
 
+# Example files
+EXAMPLE_DIR = example
+EXAMPLE_SOURCES = "$(wildcard $(EXAMPLE_DIR)/*.c)"
+EXAMPLE_OBJECTS = $(EXAMPLE_SOURCES:$(EXAMPLE_DIR)/%.c=$(EXAMPLE_DIR)/%.o)
+
 # Executable names
 EXECUTABLE = example_main
 TEST_EXECUTABLE = test_main

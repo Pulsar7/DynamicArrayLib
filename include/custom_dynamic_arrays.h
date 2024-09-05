@@ -8,31 +8,35 @@
 #include "constants.h"
 
 
-typedef struct DynamicArray {
+typedef struct DynamicArrayNode {
     void* element;
-    struct DynamicArray* next_ptr;
-    struct DynamicArray* previous_ptr;
+    struct DynamicArrayNode* next_ptr;
+    struct DynamicArrayNode* previous_ptr;
+} DynamicArrayNode;
+
+typedef enum SpecialNodePosition {
+    LIST_START_POS = 0,
+    LIST_END_POS = -1
+} SpecialNodePosition;
+
+typedef struct NodeOperationReturn {
+    ErrorCode error_code;
+    DynamicArrayNode* ptr;
+} NodeOperationReturn;
+
+typedef struct DynamicArray {
+    DynamicArrayNode* head_ptr;
+    DynamicArrayNode* tail_ptr;
 } DynamicArray;
 
-typedef enum NodeLocation {
-    LIST_START = 0,
-    LIST_END = -1
-} NodeLocation;
 
-
-
-// Functions
-DynamicArray* initialize_list(void* first_element, size_t size);
-static DynamicArray* add_node(DynamicArray* head_ptr, void* element, size_t size, int node_location);
-ErrorCode append(DynamicArray* head_ptr, void* element, size_t size);
-DynamicArray* delete_node(DynamicArray* head_ptr, DynamicArray* node);
-ErrorCode clear_list(DynamicArray* head_ptr);
-unsigned int count_elements(DynamicArray* head_ptr);
-DynamicArray* dynamic_array_from_elements(void* static_array, size_t element_size, size_t elements_amount);
-DynamicArray* dynamic_array_from_whole(void* static_array, size_t element_size, size_t elements_amount);
-ErrorCode append_static_array_to_dynamic(DynamicArray* head_ptr, void* static_array, size_t element_size, size_t elements_amount);
-void* get_element_by_index(DynamicArray* head_ptr, unsigned int index);
-ErrorCode change_element_by_index(DynamicArray* head_ptr, unsigned int index, size_t element_size, void* new_element);
+ErrorCode initialize_list(DynamicArray* dynamic_array, void* first_element, size_t element_size);
+ErrorCode add_node(DynamicArray* dynamic_array, void* element, size_t element_size, int index);
+ErrorCode append_to_list(DynamicArray* dynamic_array, void* element, size_t element_size);
+ErrorCode clear_list(DynamicArray* dynamic_array);
+size_t count_list_elements(DynamicArray* dynamic_array);
+void* get_list_element_by_index(DynamicArray* dynamic_array, int index);
+ErrorCode set_list_element_by_index(DynamicArray* dynamic_array, int index, void* element, size_t element_size);
 
 
 #endif // CUSTOM_DYNAMIC_ARRAYS_H

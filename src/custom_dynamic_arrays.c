@@ -1,239 +1,283 @@
 #include "custom_dynamic_arrays.h"
 
 
-static DynamicArray* add_node(DynamicArray* head_ptr, void* element, size_t size, int node_location) {
+// Initialize list by adding the first-element and creating the head-pointer.
+ErrorCode initialize_list(DynamicArray* dynamic_array, void* first_element, size_t element_size) {
     /*
-        Adding node to a specific location of the list
 
-        When node-location is neither `LIST_START` nor `LIST_END`, 
-        the node-location will be interpreted as an index.
+        Returns an ErrorCode, which should be `ERR_NONE` if no error occured.
     
     */
 
-    // Checking given node-location
-    if (node_location < LIST_END) {
-        return NULL;
-    }
-    
-    // Allocate space for the struct using `malloc`
-    // Allocate space for the Node itself
-    DynamicArray* current_ptr = (DynamicArray*)malloc(sizeof(DynamicArray));
-    
-    if (current_ptr == NULL) {
-        // Allocation failed
-        return NULL;
+    // Check arguments
+    if (!first_element || element_size == 0) {
+        return ERR_INVALID_ARGS;
     }
 
-    // Allocate space for the element using `malloc`
-
-    current_ptr->element = malloc(size);
+    dynamic_array->head_ptr = NULL;
+    dynamic_array->tail_ptr = NULL;
     
-    if (current_ptr->element == NULL) {
-        // Allocation failed
-        free(current_ptr);
-        return NULL;
+    ErrorCode response = add_node(dynamic_array, first_element, element_size, LIST_START_POS);
+    return response;
+}
+
+// Adds a node to the list at a given position.
+ErrorCode add_node(DynamicArray* dynamic_array, void* element, size_t element_size, int index) {
+    /*
+
+        Returns an ErrorCode, which should be `ERR_NONE` if no error occured.
+        Edits the head_ptr/tail_ptr if needed.
+    
+    */
+
+    // Checks arguments
+    if (!element || element_size == 0 || !dynamic_array || index < LIST_END_POS) {
+        return ERR_INVALID_ARGS;
     }
 
-    memcpy(current_ptr->element,element,size);
-    
+    if (!dynamic_array->head_ptr) {
+        // List is empty
+        // A head-pointer has to be created
 
-    if (head_ptr == NULL || node_location == LIST_START) {
-        // Assuming, that current node is required to be the (new) HEAD-Node
+        DynamicArrayNode* new_head_ptr = (DynamicArrayNode*) malloc(sizeof(DynamicArrayNode));
 
-        current_ptr->previous_ptr = NULL;
-
-        if (head_ptr != NULL) {
-            // New HEAD-Node
-            head_ptr->previous_ptr = current_ptr;
-            current_ptr->next_ptr = head_ptr;
-
-        } else {
-            current_ptr->next_ptr = NULL;
+        if (!new_head_ptr) {
+            // allocation error
+            return ERR_MALLOC_FAILED;
         }
 
-        return current_ptr;
+        // Allocating space for the new element
+
+        new_head_ptr->element = malloc(element_size);
+
+        if (!new_head_ptr->element) {
+            // allocation error
+            free(new_head_ptr);
+            return ERR_MALLOC_FAILED;
+        }
+
+        memcpy(new_head_ptr->element, element, element_size);
+
+        new_head_ptr->next_ptr = NULL;
+        new_head_ptr->previous_ptr = NULL;
+
+        dynamic_array->head_ptr = new_head_ptr; // Update the real head-pointer
+        dynamic_array->tail_ptr = new_head_ptr; // Tail-pointer is the head-pointer
+
+        // Operation went successful
+        return ERR_NONE;
     }
 
-    // Aussuming, that the HEAD-Node is not NULL
-    
-    int counter = 0;
-    DynamicArray* parse_ptr = head_ptr;
+    // Head-Pointer already exists
 
-    // Node-location is any index
-    while (parse_ptr->next_ptr != NULL && (counter != node_location || node_location != LIST_END)) {
-        parse_ptr = parse_ptr->next_ptr;
+    if (dynamic_array->head_ptr->previous_ptr != NULL) {
+        // Invalid head-pointer
+        // A head-pointer does not have any previous-nodes
+        return ERR_INVALID_HEAD_PTR;
+    }
+
+    if (dynamic_array->tail_ptr->next_ptr != NULL) {
+        // Invalid tail-pointer
+        // A tail-pointer does not have any next-nodes
+        return ERR_INVALID_TAIL_PTR;
+    }
+
+    if (index == LIST_START_POS) {
+        // New node should be the new head-pointer
+        DynamicArrayNode* new_head_ptr = (DynamicArrayNode*) malloc(sizeof(DynamicArrayNode));
+
+        if (!new_head_ptr) {
+            // allocation error
+            return ERR_MALLOC_FAILED;
+        }
+
+        // Allocating space for the new element
+
+        new_head_ptr->element = malloc(element_size);
+
+        if (!new_head_ptr->element) {
+            // allocation error
+            free(new_head_ptr);
+            return ERR_MALLOC_FAILED;
+        }
+
+        memcpy(new_head_ptr->element, element, element_size);
+
+        dynamic_array->head_ptr->previous_ptr = new_head_ptr; // Connect old head-pointer with the new one
+        dynamic_array->head_ptr = new_head_ptr; // Update the real head-pointer
+
+
+        // Operation went successful
+        return ERR_NONE;
+    }
+
+    if (index == LIST_END_POS) {
+        // New node should be the new tail-pointer
+        DynamicArrayNode* new_tail_ptr = (DynamicArrayNode*) malloc(sizeof(DynamicArrayNode));
+
+        if (!new_tail_ptr) {
+            // allocation error
+            return ERR_MALLOC_FAILED;
+        }
+
+        // Allocating space for the new element
+
+        new_tail_ptr->element = malloc(element_size);
+
+        if (!new_tail_ptr->element) {
+            // allocation error
+            free(new_tail_ptr);
+            return ERR_MALLOC_FAILED;
+        }
+
+        memcpy(new_tail_ptr->element, element, element_size);
+
+        dynamic_array->tail_ptr->next_ptr = new_tail_ptr; // Connect old tail-pointer with the new one
+        dynamic_array->tail_ptr = new_tail_ptr; // Update the real tail-pointer
+
+        // Operation went successful
+        return ERR_NONE;
+    }
+
+    // Iterate list
+
+    DynamicArrayNode* current_ptr = dynamic_array->head_ptr;
+    int counter = 0;
+
+    while (current_ptr != NULL && counter != index) {
+        current_ptr = current_ptr->next_ptr;
         counter++;
     }
 
-    if (counter != node_location && node_location != LIST_END) {
-        // Given Node-Location is invalid
-        // Index is larger than the list
-        free(current_ptr->element);
-        free(current_ptr); // Free allocated space
-        return NULL;
-    }
-
-    if (parse_ptr->next_ptr == NULL || node_location == LIST_END) {
-        // `parse_ptr` is the last element
-        // Appending Node at the end
-
-        parse_ptr->next_ptr = current_ptr;
-        current_ptr->previous_ptr = parse_ptr;
-
-        return current_ptr;
-    }
-
-    // Given Node-Location is another INDEX
-    // In the middle of two Nodes
-
-    current_ptr->next_ptr = parse_ptr->next_ptr;
-    parse_ptr->next_ptr->previous_ptr = current_ptr;
-    parse_ptr->next_ptr = current_ptr;
-    current_ptr->previous_ptr = parse_ptr;
-    
-    return current_ptr;
-}
-
-
-DynamicArray* initialize_list(void* first_element, size_t size) {
-    /*
-        Initializes the Dynamic-Array by allocating the first-element
-    
-        Returns the NULL-Pointer if something went wrong
-    */
-    if (first_element == NULL) {
-        // Cannot create list
-        return NULL;
-    }
-
-    DynamicArray* head_ptr = add_node(NULL, first_element, size, LIST_START);
-
-    // Created HEAD-Node
-    return head_ptr;
-}
-
-ErrorCode append(DynamicArray* head_ptr, void* element, size_t size) {
-    /*
-        Add node to initialized Dynamic-Array at the end of the list
-    
-        Returns a self-defined `ErrorCode`
-    */
-    if (head_ptr == NULL || element == NULL) {
-        // Neither the head_ptr nor the element must be NULL
-        return ERR_NULL_PTR;
-    }
-
-    DynamicArray* current_ptr = add_node(head_ptr, element, size, LIST_END);
-    
     if (current_ptr == NULL) {
-        // Something while allocating new space went wrong
+        // Index is out of boundaries
+        return ERR_INVALID_INDEX;
+    }
+
+    // Given index is valid
+    DynamicArrayNode* new_node = (DynamicArrayNode*) malloc(sizeof(DynamicArrayNode));
+    
+    if (!new_node) {
+        // allocation error
         return ERR_MALLOC_FAILED;
     }
 
-    // Appended new element at the end of the list
+    // Allocating space for the new element
+
+    new_node->element = malloc(element_size);
+
+    if (!new_node->element) {
+        // allocation error
+        free(new_node);
+        return ERR_MALLOC_FAILED;
+    }
+
+    memcpy(new_node->element, element, element_size);
+
+    if (current_ptr->next_ptr == NULL) {
+        // Current pointer has to be the tail-pointer
+        if (current_ptr != dynamic_array->tail_ptr) {
+            return ERR_INVALID_TAIL_PTR;
+        }
+    }
+
+    // Save new-node behind new tail-node
+    current_ptr->previous_ptr->next_ptr = new_node;
+    new_node->previous_ptr = current_ptr->previous_ptr;
+    current_ptr->previous_ptr = new_node;
+    new_node->next_ptr = current_ptr;
+
+    // Operation went successful
     return ERR_NONE;
+
+}
+
+// Append element at the end of the list
+ErrorCode append_to_list(DynamicArray* dynamic_array, void* element, size_t element_size) {
+    /*
+
+        Returns an ErrorCode, which should be `ERR_NONE` if no error occured.
+        Updates the tail-pointer.
     
-}
-
-DynamicArray* delete_node(DynamicArray* head_ptr, DynamicArray* node) {
-    /*
-        Delete a single node
-
-        Returns the new `head-pointer` if requied
-        Returns otherwise `NULL`
     */
 
-    if (head_ptr == NULL || node == NULL) {
-        // HEAD-Pointer/Node cannot be NULL
-        return NULL;
+    if (!dynamic_array || !element || element_size == 0) {
+        // Invalid arguments
+        return ERR_INVALID_ARGS;
     }
 
-    if (head_ptr->next_ptr != NULL) {
-        // Invalid HEAD-Pointer
-        // No Node should exist after the HEAD-Node
-        return NULL;
-    }
-
-    // Get position of given Node
-
-    if (node == head_ptr) {
-        // Delete HEAD-Node
-        DynamicArray* new_head_pointer = head_ptr->previous_ptr;
-        head_ptr->previous_ptr->next_ptr = NULL;
-        free(head_ptr->element);
-        free(head_ptr);
-
-        return new_head_pointer;
-    }
-
-    if (node->previous_ptr == NULL) {
-        // Node is at the END of the List
-        node->next_ptr->previous_ptr = NULL;
-        free(node->element);
-        free(node);
-
-        return NULL;
-    }
-
-    // Node has to be in the middle of two Nodes
-    // Despite this, checking if it's the case
-
-    if (node->previous_ptr != NULL && node->next_ptr != NULL) {
-        // Node is between two Nodes
-        node->next_ptr->previous_ptr = node->previous_ptr;
-        node->previous_ptr->next_ptr = node->next_ptr;
-        free(node->element);
-        free(node);
-
-        return NULL;
-    }
-
-    // Something went wrong
-    return NULL;
-
+    ErrorCode response = add_node(dynamic_array, element, element_size, LIST_END_POS);
+    return response;
 }
 
-ErrorCode clear_list(DynamicArray* head_ptr) {
+// Deallocates the whole given list.
+ErrorCode clear_list(DynamicArray* dynamic_array) {
     /*
-        Completely clear the Dynamic-Array
 
-        Returns a custom `ErrorCode`
+        Returns an ErrorCode, which should be `ERR_NONE` if no error occured.
+        Sets the head- & tail-pointer to `NULL`.
+    
     */
 
-    if (head_ptr == NULL) {
-        // HEAD-Pointer/Node must not be NULL
-        return ERR_NULL_PTR;
+    if (!dynamic_array) {
+        // List doesn't exist
+        return ERR_INVALID_ARGS;
     }
 
-    DynamicArray* current_ptr = head_ptr;
+    if (!dynamic_array->head_ptr) {
+        // Invalid head-pointer
+        return ERR_INVALID_HEAD_PTR;
+    }
+
+    if (!dynamic_array->tail_ptr) {
+        // Invalid tail-pointer
+        return ERR_INVALID_TAIL_PTR;
+    }
+
+    DynamicArrayNode* current_ptr = dynamic_array->head_ptr;
 
     while (current_ptr->next_ptr != NULL) {
+        if (current_ptr->element) {
+            free(current_ptr->element);
+        }
         current_ptr = current_ptr->next_ptr;
-        free(current_ptr->previous_ptr->element);
         free(current_ptr->previous_ptr);
     }
 
-    free(current_ptr->element);
+    if (current_ptr->element) {
+        free(current_ptr->element);
+    }
+
     free(current_ptr);
 
+    dynamic_array->head_ptr = NULL;
+    dynamic_array->tail_ptr = NULL;
+    
     return ERR_NONE;
 }
 
-unsigned int count_elements(DynamicArray* head_ptr) {
+// Count all nodes in the list
+size_t count_list_elements(DynamicArray* dynamic_array) {
     /*
-        Count all Nodes in the list
 
-        Returns the amount
-        Returns `UINT_MAX` if something went wrong
+        Returns the amount.
+        Returns `0` if an error occured.
+
     */
 
-    if (head_ptr == NULL) {
+    size_t counter = 0;
+
+    if (!dynamic_array) {
         // List does not exist
-        return UINT_MAX; // Error-signal
+        return counter;
     }
 
-    DynamicArray* current_ptr = head_ptr;
-    int counter = 0;
+    if (!dynamic_array->head_ptr || !dynamic_array->tail_ptr) {
+        // Invalid list
+        return counter;
+    }
+
+    DynamicArrayNode* current_ptr = dynamic_array->head_ptr;
 
     while (current_ptr != NULL) {
         counter++;
@@ -243,126 +287,30 @@ unsigned int count_elements(DynamicArray* head_ptr) {
     return counter;
 }
 
-DynamicArray* dynamic_array_from_whole(void* static_array, size_t element_size, size_t elements_amount) {
+// Get element by index
+void* get_list_element_by_index(DynamicArray* dynamic_array, int index) {
     /*
-        Tranfer a static-array as a whole into a custom dynamic array
 
-        Returns the HEAD-Pointer if the transfer was successfull
-        Returns the NULL-Pointer if the transfer failed
-    */
-
-    if (elements_amount <= 0 || static_array == NULL) {
-        // No elements
-        return NULL;
-    }
-
-    // Create HEAD-Node
-    DynamicArray* head_ptr = initialize_list(static_array, element_size*elements_amount);
-
-    if (head_ptr == NULL) {
-        // Initialization failed
-        return NULL;
-    }
+        Returns the reference to the element.
+        Returns the NULL-pointer if something went wrong.
     
-    // Transfer completed
-    return head_ptr;
-}
-
-
-DynamicArray* dynamic_array_from_elements(void* static_array, size_t element_size, size_t elements_amount) {
-    /*
-        Tranfer a static-array (its elements) into a custom dynamic array
-
-        Returns the HEAD-Pointer if the transfer was successfull
-        Returns the NULL-Pointer if the transfer failed
     */
 
-    if (elements_amount <= 0 || static_array == NULL) {
-        // No elements
+    if (!dynamic_array || index < LIST_END_POS) {
+        // List does not exist or given index is invalid
         return NULL;
     }
 
-    unsigned char* ptr = (unsigned char*) static_array; // Cast to `unsigned char*` for byte-wise access
-
-    // Get first element and create HEAD-Node
-    DynamicArray* head_ptr = initialize_list(ptr,element_size); // „i = 0: ptr + (0 * element_size)”
-
-    if (head_ptr == NULL) {
-        // Initialization failed
-        return NULL;
+    if (index == LIST_START_POS) {
+        return dynamic_array->head_ptr->element;
     }
 
-    // Iterrate the static-array
-    for (size_t i = 1; i < elements_amount; i++) {
-        void* element_ptr = ptr + (i * element_size);
-
-        if (append(head_ptr,element_ptr,element_size) != ERR_NONE) {
-            clear_list(head_ptr);
-            return NULL;
-        }
-    }
-    
-    // Transfer completed
-    return head_ptr;
-}
-
-ErrorCode append_static_array_to_dynamic(DynamicArray* head_ptr, void* static_array, size_t element_size, size_t elements_amount) {
-    /*
-        Append the each element of a static-array to an existing custom dynamic array
-        The elements are added at the end of the given dynamic-array
-
-        Returns a custom `ErrorCode`
-    */
-
-    if (elements_amount <= 0) {
-        // No elements
-        return ERR_LIST_EMPTY;
+    if (index == LIST_END_POS) {
+        return dynamic_array->tail_ptr->element;
     }
 
-    if (head_ptr == NULL) {
-        // List does not exist
-        return ERR_NULL_PTR;
-    }
-
-    unsigned char* ptr = (unsigned char*) static_array; // Cast to `unsigned char*` for byte-wise access
-
-    ErrorCode resp;
-
-    // Iterrate the static-array
-    for (size_t i = 0; i < elements_amount; i++) {
-        void* element_ptr = ptr + (i * element_size);
-
-        resp = append(head_ptr,element_ptr,element_size);
-
-        if (resp != ERR_NONE) {
-            // Not necessary
-            // clear_list(head_ptr); // Clear the whole list!
-
-            return resp;
-        }
-    }
-
-    // Operation was successful
-    return ERR_NONE;
-}
-
-void* get_element_by_index(DynamicArray* head_ptr, unsigned int index) {
-    /*
-        Get element of dynamic-array by its index
-
-        Returns the element as a void-pointer
-        Returns NULL if the index is invalid or an error occured
-    */
-
-    if (head_ptr == NULL) {
-        // List does not exist
-        return NULL;
-    }
-
-    // Iterate list
-
-    DynamicArray* current_ptr = head_ptr;
-    unsigned int counter = 0;
+    int counter = 0;
+    DynamicArrayNode* current_ptr = dynamic_array->head_ptr;
 
     while (current_ptr != NULL && counter != index) {
         current_ptr = current_ptr->next_ptr;
@@ -370,43 +318,57 @@ void* get_element_by_index(DynamicArray* head_ptr, unsigned int index) {
     }
 
     if (current_ptr == NULL) {
-        // Index is out of bounds
+        // Index is out of boundaries
         return NULL;
     }
 
     return current_ptr->element;
 }
 
-ErrorCode change_element_by_index(DynamicArray* head_ptr, unsigned int index, size_t element_size, void* new_element) {
+// Get element by index
+ErrorCode set_list_element_by_index(DynamicArray* dynamic_array, int index, void* element, size_t element_size) {
     /*
-        Change an existing elment in the List by its Index
 
-        Returns a custom `ErrorCode`
+        Returns an ErrorCode, which should be `ERR_NONE` if no error occured.
+    
     */
 
-    if (head_ptr == NULL || new_element == NULL) {
-        // List does not exist or new_element is Null
-        return ERR_NULL_PTR;
+    if (!dynamic_array || index < LIST_END_POS) {
+        return ERR_INVALID_ARGS;
     }
 
-    // Iterate list
+    void* new_element_pointer = NULL;
 
-    DynamicArray* current_ptr = head_ptr;
-    unsigned int counter = 0;
-
-    while (current_ptr != NULL && counter != index) {
-        current_ptr = current_ptr->next_ptr;
-        counter++;
+    if (index == LIST_START_POS) {
+        new_element_pointer = dynamic_array->head_ptr->element;
     }
 
-    if (current_ptr == NULL) {
-        // Index is out of bounds
-        return ERR_INVALID_INDEX;
+    if (index == LIST_END_POS) {
+        new_element_pointer = dynamic_array->tail_ptr->element;
     }
 
-    // Replace the element
-    memcpy(current_ptr->element,new_element,element_size);
 
-    // Changed element
+    if (!new_element_pointer) {
+        DynamicArrayNode* current_ptr = dynamic_array->head_ptr;
+        int counter = 0;
+        while (current_ptr != NULL && counter != index) {
+            current_ptr = current_ptr->next_ptr;
+            counter++;
+        }
+
+        if (!current_ptr) {
+            // Index is out of boundaries
+            return ERR_INVALID_INDEX;
+        }
+
+        new_element_pointer = current_ptr->element;
+    }
+
+    void* this_element = realloc(new_element_pointer, element_size);
+    if (!this_element) {
+        // Reallocation-Error
+        return ERR_REALLOC_FAILED;
+    }
+    memcpy(new_element_pointer, element, element_size);
     return ERR_NONE;
 }

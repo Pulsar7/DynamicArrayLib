@@ -1,4 +1,4 @@
-#include "test_matrices.h"
+#include "matrices_test.h"
 
 
 void test_create_matrix() {
@@ -144,24 +144,4 @@ void test_multiply_2d_matrices() {
     clear_matrix(&matrix_A);
     clear_matrix(&matrix_B);
     clear_matrix(&result.result_matrix);
-}
-
-
-int main(int argc, const char ** argv) {
-    printf("Testing `create_matrix`...\n");
-    test_create_matrix();
-    printf("Testing set and get element...\n");
-    test_set_and_get_element();
-    printf("Testing add_matrices...\n");
-    test_add_matrices();
-    printf("Testing fill_matrix_from_static_array...\n");
-    test_fill_matrix_from_static_array();
-    printf("Testing scalar_multiply_matrix...\n");
-    test_scalar_multiply_matrix();
-    printf("Testing multiply_2d_matrices...\n");
-    test_multiply_2d_matrices();
-
-    printf("All tests passed successfully!\n");
-
-    return 0;
 }
