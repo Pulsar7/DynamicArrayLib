@@ -12,6 +12,7 @@ void test_create_matrix() {
     assert(matrix.head_ptr->dimensions[0] == dimensions[0]);
     assert(matrix.head_ptr->dimensions[1] == dimensions[1]);
     assert(matrix.head_ptr->dimensions[2] == dimensions[2]);
+
     
     clear_matrix(&matrix);
 }
@@ -28,6 +29,21 @@ void test_set_and_get_element() {
     
     int* retrieved_value = (int*)get_element_by_indices(&matrix, indices);
     assert(*retrieved_value == 42);
+
+    // Test if errors are handled properly
+
+    // Invalid data-type
+    float float_value = 3.14;
+    err = set_element_by_indices(&matrix, indices, (void*)&float_value);
+    assert(err == ERR_NONE);
+
+    void* error_result = get_element_by_indices(&matrix, indices);
+    assert(*(int*)error_result != (int)float_value);
+
+    // Index should be out of range
+    error_result = get_element_by_indices(&matrix, (size_t[]){2, 2});
+    assert(error_result == NULL);
+    
     
     clear_matrix(&matrix);
 }
@@ -46,10 +62,29 @@ void test_add_matrices() {
     assert(result.error_code == ERR_NONE);
     int* result_value = (int*)get_element_by_indices(&result.result_matrix, (size_t[]){0, 0});
     assert(*result_value == 3);
-    
+
+    // Add matrices with different dimension-sizes
+    MultiDimensionalMatrix third_matrix;
+    dimensions[0] = 1;
+    create_matrix(&third_matrix, 2, dimensions, TYPE_INT);
+    set_element_by_indices(&third_matrix, (size_t[]){0, 0}, (void*)&val2);
+    result = add_matrices(&matrix_A, &third_matrix);
+    assert(result.error_code == ERR_DIMENSION_SIZE_MISMATCH);
+
+    // Add matrices with different data-types
+    dimensions[0] = 2;
+    MultiDimensionalMatrix fourth_matrix;
+    ErrorCode error = create_matrix(&fourth_matrix, 2, dimensions, TYPE_FLOAT);
+    error = set_element_by_indices(&fourth_matrix, (size_t[]){0, 0}, (void*)&val2);
+    assert(error == ERR_NONE);
+    result = add_matrices(&matrix_A, &fourth_matrix);
+    assert(result.error_code == ERR_DATATYPE_MISMATCH);
+
     clear_matrix(&matrix_A);
     clear_matrix(&matrix_B);
     clear_matrix(&result.result_matrix);
+    clear_matrix(&third_matrix);
+    clear_matrix(&fourth_matrix);
 }
 
 void test_fill_matrix_from_static_array() {

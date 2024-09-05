@@ -1,9 +1,9 @@
 #include "custom_dynamic_matrices.h"
 
 
+// Create a multidimensional matrix
 ErrorCode create_matrix(MultiDimensionalMatrix* matrix, size_t number_of_dimensions, size_t* dimensions, DataType data_type) {
     /*
-        Create a multidimensional matrix
 
         Returns a custom defined ErrorCode, which should be `ERR_NONE` if no error occured.
     */
@@ -83,10 +83,12 @@ ErrorCode create_matrix(MultiDimensionalMatrix* matrix, size_t number_of_dimensi
 }
 
 
+// Free all allocated space
 void clear_matrix(MultiDimensionalMatrix* matrix) {
-    /*
-        Free all allocated space
-    */
+    if (!matrix) {
+        // Matrix does not exist
+        return;
+    }
 
     if (!matrix->head_ptr) {
         // Invalid matrix
@@ -109,9 +111,9 @@ void clear_matrix(MultiDimensionalMatrix* matrix) {
     return;
 }
 
+// Calculate the index of the 1-Dimensional-array with the given multidimensional indices.
 static IndexCalcReturn calc_index(MultiDimensionalMatrix* matrix, size_t* indices) {
     /*
-        Calculate the index of the 1-Dimensional-array with the given multidimensional indices
 
         Returns the custom `IndexCalcReturn`-struct in order to return the index and
         a self-defined Error-Code, if something went wrong.
@@ -153,12 +155,13 @@ static IndexCalcReturn calc_index(MultiDimensionalMatrix* matrix, size_t* indice
     return return_data;
 }
 
+// Get single element by its indices (position in the matrix)
 void* get_element_by_indices(MultiDimensionalMatrix* matrix, size_t* indices) {
     /*
-        Get single element by its indices (position in the matrix)
 
         Returns the element as a void-Pointer.
         Returns a NULL-Pointer if something went wrong.
+
     */
 
     if (!matrix || !indices || !matrix->head_ptr) {
@@ -210,9 +213,9 @@ void* get_element_by_indices(MultiDimensionalMatrix* matrix, size_t* indices) {
     return NULL;
 }
 
+// Set an element at the given position, but by its flat/linear index in the struct.
 static ErrorCode set_element_by_linear_index(MultiDimensionalMatrix* matrix, size_t index, void* value) {
     /*
-        Set an element at the given position, but by its flat/linear index in the struct.
 
         Returns a custom `ErrorCode`
     */
@@ -256,9 +259,9 @@ static ErrorCode set_element_by_linear_index(MultiDimensionalMatrix* matrix, siz
 
 }
 
+// Set an element at the given position (indices)
 ErrorCode set_element_by_indices(MultiDimensionalMatrix* matrix, size_t* indices, void* value) {
     /*
-        Set an element at the given position (indices)
 
         Returns a custom `ErrorCode`
     */
@@ -282,12 +285,11 @@ ErrorCode set_element_by_indices(MultiDimensionalMatrix* matrix, size_t* indices
 }
 
 
+// Fill a given matrix with a static-array.
 ErrorCode fill_matrix_from_static_array(MultiDimensionalMatrix* matrix, void* static_array) {
     /*
-    
-        Fill a given matrix with a static-array
 
-        Assuming, that the given dimensions of the static-array are the same as of the matrix
+        Assuming, that the given dimensions of the static-array are the same as of the matrix.
 
         Returns a custom `ErrorCode` (should be `ERR_NONE` if no error occured)
 
@@ -341,13 +343,13 @@ ErrorCode fill_matrix_from_static_array(MultiDimensionalMatrix* matrix, void* st
 
 }
 
-
+//
 // Arithmetic Operations
+//
 
+// Addition of two multidimensional-matrices.
 ArithmeticOperationReturn add_matrices(const MultiDimensionalMatrix* matrix_A, const MultiDimensionalMatrix* matrix_B) {
     /*
-
-        Addition of two multidimensional-matrices
 
         Returns a custom-defined `ArithmeticOperationReturn`-struct, which contains the result-matrix (NULL-Pointer if an error occured)
         and an `ErrorCode`.
@@ -366,14 +368,14 @@ ArithmeticOperationReturn add_matrices(const MultiDimensionalMatrix* matrix_A, c
     // Check dimensions
     if (matrix_A->head_ptr->number_of_dimensions != matrix_B->head_ptr->number_of_dimensions) {
         // Cannot add two matrices with different dimensions
-        response.error_code = ERR_INVALID_ARGS;
+        response.error_code = ERR_DIMENSION_COUNT_MISMATCH;
         return response;
     }
 
     for (size_t i = 0; i < matrix_A->head_ptr->number_of_dimensions; i++) {
         if (matrix_A->head_ptr->dimensions[i] != matrix_B->head_ptr->dimensions[i]) {
             // Mismatch
-            response.error_code = ERR_INVALID_ARGS;
+            response.error_code = ERR_DIMENSION_SIZE_MISMATCH;
             return response;
         }
     }
@@ -381,7 +383,7 @@ ArithmeticOperationReturn add_matrices(const MultiDimensionalMatrix* matrix_A, c
     // Check data_type
     if (matrix_A->head_ptr->data_type != matrix_B->head_ptr->data_type) {
         // Cannot add two matrices with different data-types
-        response.error_code = ERR_INVALID_ARGS;
+        response.error_code = ERR_DATATYPE_MISMATCH;
         return response;
     }
 
@@ -443,10 +445,9 @@ ArithmeticOperationReturn add_matrices(const MultiDimensionalMatrix* matrix_A, c
 
 }
 
-
+// Multiplication of two 2-Dimensional-matrices.
 ArithmeticOperationReturn multiply_2d_matrices(const MultiDimensionalMatrix* matrix_A, const MultiDimensionalMatrix* matrix_B) {
     /*
-        Multiplication of two 2-Dimensional-matrices
 
         Returns a custom-defined `ArithmeticOperationReturn`-struct, which contains the result-matrix (NULL-Pointer if an error occured)
         and an `ErrorCode`.
@@ -562,11 +563,9 @@ ArithmeticOperationReturn multiply_2d_matrices(const MultiDimensionalMatrix* mat
     return response;
 }
 
-
+// Multiplication of a matrix and a scalar.
 ArithmeticOperationReturn scalar_multiply_matrix(const MultiDimensionalMatrix* matrix, void* scalar) {
     /*
-
-        Multiplication of a matrix and a scalar
 
         Returns a custom-defined `ArithmeticOperationReturn`-struct, which contains the result-matrix (NULL-Pointer if an error occured)
         and an `ErrorCode`.

@@ -30,6 +30,10 @@ typedef struct DynamicArray {
 } DynamicArray;
 
 
+//
+// Functions
+//
+
 ErrorCode initialize_list(DynamicArray* dynamic_array, void* first_element, size_t element_size);
 ErrorCode add_node(DynamicArray* dynamic_array, void* element, size_t element_size, int index);
 ErrorCode append_to_list(DynamicArray* dynamic_array, void* element, size_t element_size);

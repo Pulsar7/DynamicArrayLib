@@ -32,14 +32,16 @@ typedef struct IndexCalcReturn {
     ErrorCode error_code;
 } IndexCalcReturn;
 
+// Return-Object for every matrix-related arithmetic operation
 typedef struct ArithmeticOperationReturn {
     MultiDimensionalMatrix result_matrix;
     ErrorCode error_code;  
 } ArithmeticOperationReturn;
 
 
-
+//
 // Functions
+//
 
 ErrorCode create_matrix(MultiDimensionalMatrix* matrix, size_t number_of_dimensions, size_t* dimensions, DataType data_type);
 void clear_matrix(MultiDimensionalMatrix* matrix);
