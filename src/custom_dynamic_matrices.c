@@ -358,6 +358,7 @@ ArithmeticOperationReturn add_matrices(const MultiDimensionalMatrix* matrix_A, c
 
     ArithmeticOperationReturn response;
     response.error_code = ERR_NONE;
+    response.result_matrix.head_ptr = NULL;
 
     if (!matrix_A || !matrix_B || !matrix_A->head_ptr || !matrix_B->head_ptr) {
         // Wether `matrix_A` or `matrix_B` (or both) is a NULL-Pointer

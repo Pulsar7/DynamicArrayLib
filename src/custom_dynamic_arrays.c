@@ -68,7 +68,9 @@ ErrorCode add_node(DynamicArray* dynamic_array, void* element, size_t element_si
         return ERR_NONE;
     }
 
+    //
     // Head-Pointer already exists
+    //
 
     if (dynamic_array->head_ptr->previous_ptr != NULL) {
         // Invalid head-pointer
@@ -133,6 +135,7 @@ ErrorCode add_node(DynamicArray* dynamic_array, void* element, size_t element_si
         memcpy(new_tail_ptr->element, element, element_size);
 
         dynamic_array->tail_ptr->next_ptr = new_tail_ptr; // Connect old tail-pointer with the new one
+        new_tail_ptr->previous_ptr = dynamic_array->tail_ptr; // Old tail-pointer is now the new previous-ptr of the new tail-pointer
         dynamic_array->tail_ptr = new_tail_ptr; // Update the real tail-pointer
 
         // Operation went successful
