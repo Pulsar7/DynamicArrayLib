@@ -6,7 +6,9 @@ ErrorCode initialize_list(DynamicArray* dynamic_array, void* first_element, size
     /*
 
         Returns an ErrorCode, which should be `ERR_NONE` if no error occured.
-    
+   
+	    ERR_INVALID_ARGS	= Given element does not exist; Element size is invalid;
+
     */
 
     // Check arguments
@@ -328,7 +330,7 @@ void* get_list_element_by_index(DynamicArray* dynamic_array, int index) {
     return current_ptr->element;
 }
 
-// Get element by index
+// Set element by index
 ErrorCode set_list_element_by_index(DynamicArray* dynamic_array, int index, void* element, size_t element_size) {
     /*
 

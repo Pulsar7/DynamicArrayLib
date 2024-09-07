@@ -4,7 +4,7 @@
 void test_create_matrix() {
     MultiDimensionalMatrix matrix;
     size_t dimensions[3] = {3, 2, 2};
-    
+
     // Test valid matrix creation
     ErrorCode err = create_matrix(&matrix, 3, dimensions, TYPE_INT);
     assert(err == ERR_NONE);
@@ -13,7 +13,7 @@ void test_create_matrix() {
     assert(matrix.head_ptr->dimensions[1] == dimensions[1]);
     assert(matrix.head_ptr->dimensions[2] == dimensions[2]);
 
-    
+
     clear_matrix(&matrix);
 }
 
@@ -179,4 +179,81 @@ void test_multiply_2d_matrices() {
     clear_matrix(&matrix_A);
     clear_matrix(&matrix_B);
     clear_matrix(&result.result_matrix);
+}
+
+// Test resizing matrices.
+void test_resize_matrix() {
+    // Create Matrix A
+
+    MultiDimensionalMatrix matrix_A;
+
+    size_t A_dimensions[] = {2};
+    create_matrix(&matrix_A, 1, A_dimensions, TYPE_INT);
+
+    int A_static_array[] = { 1, 2 };
+    fill_matrix_from_static_array(&matrix_A, A_static_array);
+
+    size_t new_dimensions[] = { 2, 2 };
+    ErrorCode err = resize_matrix(&matrix_A, 2, new_dimensions);
+
+    // Create Matrix B
+
+    MultiDimensionalMatrix matrix_B;
+
+    create_matrix(&matrix_B, 2, new_dimensions, TYPE_INT);
+
+    int B_static_array[2][2] = { {1, 2}, {3, 4}  };
+    assert(fill_matrix_from_static_array(&matrix_B, B_static_array) == ERR_NONE);
+
+    // Add both matrices
+    ArithmeticOperationReturn result = add_matrices(&matrix_A, &matrix_B);
+    assert(result.error_code == ERR_NONE);
+    assert(result.result_matrix.head_ptr != NULL);
+
+    // DEBUG
+    printf("result_matrix[0][0] = %d\n", *(int*)get_element_by_indices(&result.result_matrix, (size_t[]){0, 0}));
+    printf("result_matrix[0][1] = %d\n", *(int*)get_element_by_indices(&result.result_matrix, (size_t[]){0, 1}));
+    //
+
+    assert(*(int*)get_element_by_indices(&result.result_matrix, (size_t[]){0, 0}) == 2);
+    assert(*(int*)get_element_by_indices(&result.result_matrix, (size_t[]){0, 1}) == 4);
+    assert(*(int*)get_element_by_indices(&result.result_matrix, (size_t[]){1, 0}) == 6);
+    assert(*(int*)get_element_by_indices(&result.result_matrix, (size_t[]){1, 1}) == 8);
+
+    // Deallocate both matrices.
+    clear_matrix(&matrix_A);
+    clear_matrix(&matrix_B);
+}
+
+void test_change_data_type() {
+    // Create matrix.
+    MultiDimensionalMatrix matrix;
+    size_t dimensions[2] = { 2, 2 };
+    create_matrix(&matrix, 2, dimensions, TYPE_INT);
+
+    // Fill matrix with integers.
+    int static_array[2][2] = { {1, 2}, {3, 4} };
+    ErrorCode error = fill_matrix_from_static_array(&matrix, static_array);
+    assert(error == ERR_NONE);
+
+    // Check values before changing the data-type.
+    assert(*(int*)get_element_by_indices(&matrix, (size_t[]){0, 0} == 1));
+    assert(*(int*)get_element_by_indices(&matrix, (size_t[]){0, 1} == 2));
+    assert(*(int*)get_element_by_indices(&matrix, (size_t[]){1, 0} == 3));
+    assert(*(int*)get_element_by_indices(&matrix, (size_t[]){1, 1} == 4));
+
+    error = change_data_type(&matrix, TYPE_INT);
+    assert(error == ERR_INVALID_ARGS);
+    error = change_data_type(&matrix, TYPE_FLOAT);
+    assert(error == ERR_NONE);
+
+    // Check values after changing the data-type.
+    assert(*(int*)get_element_by_indices(&matrix, (size_t[]){0, 0} == 1));
+    assert(*(int*)get_element_by_indices(&matrix, (size_t[]){0, 1} == 2));
+    assert(*(int*)get_element_by_indices(&matrix, (size_t[]){1, 0} == 3));
+    assert(*(int*)get_element_by_indices(&matrix, (size_t[]){1, 1} == 4));
+
+    // Clear matrix
+    clear_matrix(&matrix);
+
 }
