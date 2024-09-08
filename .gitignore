@@ -1,0 +1,6 @@
+*.o
+old_makefile
+.vscode/*
+test_main
+example_main
+*.swp
