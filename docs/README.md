@@ -8,6 +8,7 @@
   - [Multidimensional Matrices](#multidimensional-matrices)
 - [Testing](#testing)
 - [Installation](#installation)
+- [ToDo](#todo)
 
 
 ## Description
@@ -55,3 +56,8 @@ To use this library in your project, clone the repository and include the releva
 git clone https://github.com/Pulsar7/DynamicArrayLib/tree/main
 cd DynamicArrayLib
 ```
+
+## ToDo
+
+- [ ] Resize given matrix
+- [ ] Append a static-array to a given matrix

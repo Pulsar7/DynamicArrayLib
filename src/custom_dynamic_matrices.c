@@ -1,11 +1,77 @@
 #include "custom_dynamic_matrices.h"
 
 
+// Update data_type and allocates space for matrix-data.
+static ErrorCode update_data_type(MultiDimensionalMatrix* matrix, DataType data_type) {
+    /*
+
+        Returns an ErrorCode.
+
+        ERR_NONE                 = No error.
+        ERR_NULL_PTR             = Matrix does not exist or head-pointer is NULL;
+        ERR_UNSUPPORTED_DATATYPE = Given data_type is invalid;
+
+    */
+    if (!matrix || !matrix->head_ptr) {
+        // Matrix does not exist or head_ptr is NULL.
+        return ERR_NULL_PTR;
+    }
+
+    // Get total size of dimensions
+    size_t total_size = 1;
+
+    for (size_t i = 0; i < matrix->head_ptr->number_of_dimensions; i++) {
+        total_size *= matrix->head_ptr->dimensions[i];
+    }
+
+    switch(data_type) {
+        case TYPE_INT:
+            matrix->head_ptr->data = malloc(total_size * sizeof(int));
+            matrix->head_ptr->data_size = total_size * sizeof(int);
+            break;
+
+        case TYPE_FLOAT:
+            matrix->head_ptr->data = malloc(total_size * sizeof(float));
+            matrix->head_ptr->data_size = total_size * sizeof(float);
+            break;
+
+        case TYPE_DOUBLE:
+            matrix->head_ptr->data = malloc(total_size * sizeof(double));
+            matrix->head_ptr->data_size = total_size * sizeof(double);
+            break;
+
+        default:
+            // Given data_type is not supported.
+            matrix->head_ptr->data = NULL;
+            clear_matrix(matrix);
+            return ERR_UNSUPPORTED_DATATYPE;
+    }
+
+    if (!matrix->head_ptr->data) {
+        // Allocation-Error or invalid data_type
+        clear_matrix(matrix);
+        return ERR_MALLOC_FAILED;
+    }
+
+    matrix->head_ptr->data_type = data_type;
+
+    return ERR_NONE;
+}
+
+
+// Create a multidimensional matrix
 ErrorCode create_matrix(MultiDimensionalMatrix* matrix, size_t number_of_dimensions, size_t* dimensions, DataType data_type) {
     /*
-        Create a multidimensional matrix
 
-        Returns a custom defined ErrorCode, which should be `ERR_NONE` if no error occured.
+        Returns a custom `ErrorCode`.
+
+        ERR_NONE                  = No error.
+        ERR_NULL_PTR              = Matrix does not exist; Dimensions-array is NULL;
+        ERR_MALLOC_FAILED         = Space allocation with `malloc` failed;
+        ERR_UNSUPPORTED_DATATYPE  = Unsupported Data-Type;
+
+        » For the other possible ErrorCodes, see what `update_data_type` returns. «
+
     */
 
     if (number_of_dimensions == 0) {
@@ -40,53 +106,16 @@ ErrorCode create_matrix(MultiDimensionalMatrix* matrix, size_t number_of_dimensi
 
     memcpy(head_ptr->dimensions, dimensions, number_of_dimensions * sizeof(size_t));
 
-    // Get total size of dimensions
-    size_t total_size = 1;
-
-    for (size_t i = 0; i < number_of_dimensions; i++) {
-        total_size *= dimensions[i];
-    }
-
-    switch(data_type) {
-        case TYPE_INT:
-            head_ptr->data = malloc(total_size * sizeof(int));
-            head_ptr->data_size = total_size * sizeof(int);
-            break;
-        
-        case TYPE_FLOAT:
-            head_ptr->data = malloc(total_size * sizeof(float));
-            head_ptr->data_size = total_size * sizeof(float);
-            break;
-
-        case TYPE_DOUBLE:
-            head_ptr->data = malloc(total_size * sizeof(double));
-            head_ptr->data_size = total_size * sizeof(double);
-            break;
-
-        default:
-            // Should be unreachable
-            // Not supported Data-Type
-            head_ptr->data = NULL;
-            break;
-    }
-
-    if (!head_ptr->data) {
-        // Allocation-Error or invalid Data-Type
-        clear_matrix(matrix);
-        return ERR_MALLOC_FAILED;
-    }
-
-    head_ptr->data_type = data_type;
-
-    // Operation was successful
-    return ERR_NONE;
+    return update_data_type(matrix, data_type);
 }
 
 
+// Free all allocated space.
 void clear_matrix(MultiDimensionalMatrix* matrix) {
-    /*
-        Free all allocated space
-    */
+    if (!matrix) {
+        // Matrix does not exist
+        return;
+    }
 
     if (!matrix->head_ptr) {
         // Invalid matrix
@@ -109,9 +138,9 @@ void clear_matrix(MultiDimensionalMatrix* matrix) {
     return;
 }
 
+// Calculate the index of the 1-Dimensional-array with the given multidimensional indices.
 static IndexCalcReturn calc_index(MultiDimensionalMatrix* matrix, size_t* indices) {
     /*
-        Calculate the index of the 1-Dimensional-array with the given multidimensional indices
 
         Returns the custom `IndexCalcReturn`-struct in order to return the index and
         a self-defined Error-Code, if something went wrong.
@@ -153,12 +182,13 @@ static IndexCalcReturn calc_index(MultiDimensionalMatrix* matrix, size_t* indice
     return return_data;
 }
 
+// Get single element by its indices (position in the matrix)
 void* get_element_by_indices(MultiDimensionalMatrix* matrix, size_t* indices) {
     /*
-        Get single element by its indices (position in the matrix)
 
         Returns the element as a void-Pointer.
         Returns a NULL-Pointer if something went wrong.
+
     */
 
     if (!matrix || !indices || !matrix->head_ptr) {
@@ -184,25 +214,24 @@ void* get_element_by_indices(MultiDimensionalMatrix* matrix, size_t* indices) {
                 return NULL;
             }
             return (void*)((int*)matrix->head_ptr->data + index);
-            break; // Unreachable?
+            break; // Unreachable ???
 
         case TYPE_FLOAT:
             if (index >= matrix->head_ptr->data_size / sizeof(float)) {
                 return NULL;
             }
             return (void*)((float*)matrix->head_ptr->data + index);
-            break; // Unreachable?
+            break; // Unreachable ???
         
         case TYPE_DOUBLE:
             if (index >= matrix->head_ptr->data_size / sizeof(double)) {
                 return NULL;
             }
             return (void*)((double*)matrix->head_ptr->data + index);
-            break; // Unreachable?
+            break; // Unreachable ???
 
         default:
             // Unsupported Data-Type
-            // Unreachable?
             return NULL;
     }
 
@@ -210,11 +239,17 @@ void* get_element_by_indices(MultiDimensionalMatrix* matrix, size_t* indices) {
     return NULL;
 }
 
+// Set an element at the given position, but by its flat/linear index in the struct.
 static ErrorCode set_element_by_linear_index(MultiDimensionalMatrix* matrix, size_t index, void* value) {
     /*
-        Set an element at the given position, but by its flat/linear index in the struct.
 
         Returns a custom `ErrorCode`
+
+        ERR_NONE                  = No error.
+        ERR_NULL_PTR              = Matrix does not exist; Value does not exist; Matrix-head pointer does not exist;
+        ERR_INVALID_INDEX         = Given element-index is invalid;
+        ERR_UNSUPPORTED_DATATYPE  = Unsupported Data-Type;
+
     */
 
     if (!matrix || !value || !matrix->head_ptr) {
@@ -248,19 +283,24 @@ static ErrorCode set_element_by_linear_index(MultiDimensionalMatrix* matrix, siz
 
         default:
             // Unsupported Data-Type
-            // Unreachable?
-            return ERR_INVALID_ARGS;
+            return ERR_UNSUPPORTED_DATATYPE;
     }
 
     return ERR_NONE;
 
 }
 
+// Set an element at the given position (indices)
 ErrorCode set_element_by_indices(MultiDimensionalMatrix* matrix, size_t* indices, void* value) {
     /*
-        Set an element at the given position (indices)
 
         Returns a custom `ErrorCode`
+
+        ERR_NONE          = No error.
+        ERR_NULL_PTR      = Matrix does not exist; Given value does not exist; Given indices-array does not exist;
+
+        » For the other possible ErrorCodes, see what `set_element_by_linear_index` returns. «
+
     */
 
     if (!matrix || !indices || !matrix->head_ptr) {
@@ -282,14 +322,19 @@ ErrorCode set_element_by_indices(MultiDimensionalMatrix* matrix, size_t* indices
 }
 
 
+// Fill a given matrix with a static-array.
 ErrorCode fill_matrix_from_static_array(MultiDimensionalMatrix* matrix, void* static_array) {
     /*
-    
-        Fill a given matrix with a static-array
 
-        Assuming, that the given dimensions of the static-array are the same as of the matrix
+        Assuming, that the given dimensions of the static-array are the same as of the matrix.
 
-        Returns a custom `ErrorCode` (should be `ERR_NONE` if no error occured)
+        Returns a custom `ErrorCode`.
+
+        ERR_NONE                     = No error.
+        ERR_NULL_PTR                 = Matrix does not exist; Given static-array does not exist; Matrix head-pointer does not exist;
+        ERR_UNSUPPORTED_DATATYPE     = Unsupported data type;
+
+        » For the other possible ErrorCodes, see what `set_element_by_linear_index` returns. «
 
     */
 
@@ -313,8 +358,7 @@ ErrorCode fill_matrix_from_static_array(MultiDimensionalMatrix* matrix, void* st
             break;
         default:
             // Unsupported data_type
-            // Reachable?
-            return ERR_UNKNOWN;
+            return ERR_UNSUPPORTED_DATATYPE;
     }
 
     size_t total_size = matrix->head_ptr->data_size / element_size;
@@ -342,20 +386,153 @@ ErrorCode fill_matrix_from_static_array(MultiDimensionalMatrix* matrix, void* st
 }
 
 
-// Arithmetic Operations
+// Change number of dimensions or/and the dimension sizes.
+ErrorCode resize_matrix(MultiDimensionalMatrix* matrix, size_t new_number_of_dimensions, size_t* new_dimensions) {
+    /*
+        !!! ToDo !!!
+        Doesn't work at all.
 
+        Returns a custom `ErrorCode`.
+
+        ERR_NONE            = No error.
+        ERR_NULL_PTR        = Matrix does not exist; Dimensions-array does not exist;
+        ERR_INVALID_ARGS    = Invalid number of dimensions; Invalid dimension-size;
+
+    */
+
+    if (!matrix || !new_dimensions) {
+        // Matrix/dimensions-array does not exist
+        return ERR_NULL_PTR;
+    }
+
+    if (new_number_of_dimensions == 0) {
+        // Invalid number of dimensions
+        return ERR_INVALID_ARGS;
+    }
+
+    if (new_number_of_dimensions != matrix->head_ptr->number_of_dimensions) {
+        // Change number of dimensions
+        // Check if `new_dimensions`-array is valid
+        for (size_t i = 0; i < new_number_of_dimensions; i++) {
+            // Check dimension-size
+            if (new_dimensions[i] < 0) {
+                // Invalid dimension-size
+                //
+                // ??? Reachable ???
+                // Because, array has the data-type `size_t`
+                //
+                return ERR_INVALID_ARGS;
+            }
+        }
+
+
+    } else {
+        // `new_number_of_dimensions` should equal the old one
+        // Check dimension-sizes
+        /*size_t equal = 1;
+        for (size_t i = 0; i < new_number_of_dimensions; i++) {
+            if (matrix->head_ptr->dimensions[i] != new_dimensions[i]) {
+                equal = 0;
+                break;
+            }
+        }*/
+
+        // Or use compare
+        if (memcmp(matrix->head_ptr->dimensions, new_dimensions, matrix->head_ptr->number_of_dimensions * sizeof(size_t))) {
+            // Nothing to change.
+            return ERR_NONE;
+        }
+
+        // !!!
+        //
+        // Shouldn't be reachable for now
+        // DEBUG
+        //
+        // !!!
+
+        //if (equal) {
+            // Nothing to change.
+        //    return ERR_NONE;
+        //}
+    }
+
+    // Reallocate space for the dimensions-array
+    matrix->head_ptr->dimensions = (size_t*) realloc(matrix->head_ptr->dimensions, new_number_of_dimensions * sizeof(size_t));
+
+    if (!matrix->head_ptr->dimensions) {
+        // Reallocation failed
+        //
+        // Should the matrix be deleted, because `dimensions` should be `NULL`, right?
+        // ??? clear_matrix(&matrix); ???
+        //
+        return ERR_REALLOC_FAILED;
+    }
+
+    memcpy(matrix->head_ptr->dimensions, new_dimensions, new_number_of_dimensions * sizeof(size_t));
+
+    // Changing the number of dimensions
+    matrix->head_ptr->number_of_dimensions = new_number_of_dimensions;
+
+    // Resize `data`
+    return update_data_type(matrix, matrix->head_ptr->data_type);
+}
+
+// Change data type of given matrix.
+ErrorCode change_data_type(MultiDimensionalMatrix* matrix, DataType new_data_type) {
+    /*
+
+        Returns an ErrorCode.
+
+        ERR_NONE            = No error.
+        ERR_NULL_PTR        = Matrix does not exist or head-pointer is NULL;
+        ERR_INVALID_ARGS    = Given new data_type equals the old one;
+
+        » For the other possible ErrorCodes, see what `update_data_type` returns. «
+
+    */
+    if (!matrix || !matrix->head_ptr) {
+        // Matrix does not exist or head-pointer is NULL.
+        return ERR_NULL_PTR;
+    }
+
+    if (new_data_type == matrix->head_ptr->data_type) {
+        // Nothing to change.
+        return ERR_INVALID_ARGS;
+    }
+
+    return update_data_type(matrix, new_data_type);
+}
+
+
+//
+// Arithmetic Operations
+//
+
+
+// Addition of two multidimensional-matrices.
 ArithmeticOperationReturn add_matrices(const MultiDimensionalMatrix* matrix_A, const MultiDimensionalMatrix* matrix_B) {
     /*
 
-        Addition of two multidimensional-matrices
+        Returns a `ArithmeticOperationReturn` struct, which contains:
 
-        Returns a custom-defined `ArithmeticOperationReturn`-struct, which contains the result-matrix (NULL-Pointer if an error occured)
-        and an `ErrorCode`.
-    
+        - MultiDimensionalMatrix result_matrix: The result of this operation.
+        - ErrorCode error_code                : Indicating the operation status.
+        
+
+        Possible `ErrorCodes`:
+
+        ERR_NONE                        = No error.
+        ERR_NULL_PTR                    = One or both matrices are NULL (head-pointer is invalid);
+        ERR_DIMENSION_COUNT_MISMATCH    = The number of dimensions of both matrices are not the same;
+        ERR_DIMENSION_SIZE_MISMATCH     = The size of each dimension in both matrices do not match;
+        ERR_DATATYPE_MISMATCH           = The data types of both matrices do not match;
+        ERR_UNSUPPORTED_DATATYPE        = Unsupported data-type;
+
     */
 
     ArithmeticOperationReturn response;
     response.error_code = ERR_NONE;
+    response.result_matrix.head_ptr = NULL;
 
     if (!matrix_A || !matrix_B || !matrix_A->head_ptr || !matrix_B->head_ptr) {
         // Wether `matrix_A` or `matrix_B` (or both) is a NULL-Pointer
@@ -366,14 +543,14 @@ ArithmeticOperationReturn add_matrices(const MultiDimensionalMatrix* matrix_A, c
     // Check dimensions
     if (matrix_A->head_ptr->number_of_dimensions != matrix_B->head_ptr->number_of_dimensions) {
         // Cannot add two matrices with different dimensions
-        response.error_code = ERR_INVALID_ARGS;
+        response.error_code = ERR_DIMENSION_COUNT_MISMATCH;
         return response;
     }
 
     for (size_t i = 0; i < matrix_A->head_ptr->number_of_dimensions; i++) {
         if (matrix_A->head_ptr->dimensions[i] != matrix_B->head_ptr->dimensions[i]) {
             // Mismatch
-            response.error_code = ERR_INVALID_ARGS;
+            response.error_code = ERR_DIMENSION_SIZE_MISMATCH;
             return response;
         }
     }
@@ -381,7 +558,7 @@ ArithmeticOperationReturn add_matrices(const MultiDimensionalMatrix* matrix_A, c
     // Check data_type
     if (matrix_A->head_ptr->data_type != matrix_B->head_ptr->data_type) {
         // Cannot add two matrices with different data-types
-        response.error_code = ERR_INVALID_ARGS;
+        response.error_code = ERR_DATATYPE_MISMATCH;
         return response;
     }
 
@@ -432,8 +609,7 @@ ArithmeticOperationReturn add_matrices(const MultiDimensionalMatrix* matrix_A, c
 
         default:
             // Unsupported Data_Type
-            // This section shouldn't be reached
-            response.error_code = ERR_UNKNOWN;
+            response.error_code = ERR_UNSUPPORTED_DATATYPE;
             clear_matrix(&result_matrix);
             return response;
     }
@@ -443,13 +619,24 @@ ArithmeticOperationReturn add_matrices(const MultiDimensionalMatrix* matrix_A, c
 
 }
 
-
+// Multiplication of two 2-Dimensional-matrices.
 ArithmeticOperationReturn multiply_2d_matrices(const MultiDimensionalMatrix* matrix_A, const MultiDimensionalMatrix* matrix_B) {
     /*
-        Multiplication of two 2-Dimensional-matrices
 
-        Returns a custom-defined `ArithmeticOperationReturn`-struct, which contains the result-matrix (NULL-Pointer if an error occured)
-        and an `ErrorCode`.
+        Returns a `ArithmeticOperationReturn` struct, which contains:
+
+        - MultiDimensionalMatrix result_matrix: The result of this operation.
+        - ErrorCode error_code                : Indicating the operation status.
+        
+
+        Possible `ErrorCodes`:
+
+        ERR_NONE                        = No error.
+        ERR_NULL_PTR                    = One or both matrices are NULL (head-pointer is invalid);
+        ERR_INVALID_ARGS                = The number of dimensions in both matrices do not match;
+
+        » For the other possible ErrorCodes, see what `create_matrix` returns. «
+
     */
 
     ArithmeticOperationReturn response;
@@ -562,17 +749,25 @@ ArithmeticOperationReturn multiply_2d_matrices(const MultiDimensionalMatrix* mat
     return response;
 }
 
-
+// Multiplication of a matrix and a scalar.
 ArithmeticOperationReturn scalar_multiply_matrix(const MultiDimensionalMatrix* matrix, void* scalar) {
     /*
 
-        Multiplication of a matrix and a scalar
+        Returns a `ArithmeticOperationReturn` struct, which contains:
 
-        Returns a custom-defined `ArithmeticOperationReturn`-struct, which contains the result-matrix (NULL-Pointer if an error occured)
-        and an `ErrorCode`.
+        - MultiDimensionalMatrix result_matrix: The result of this operation.
+        - ErrorCode error_code                : Indicating the operation status.
+        
+
+        Possible `ErrorCodes`:
+
+        ERR_NONE                        = No error.
+        ERR_NULL_PTR                    = Matrix does not exist; Given scalar does not exist; Matrix head-pointer is NULL;
+        ERR_UNSUPPORTED_DATATYPE        = Unsupported data-type
+
+        » For the other possible ErrorCodes, see what `create_matrix` returns. «
 
     */
-
     ArithmeticOperationReturn response;
     response.error_code = ERR_NONE;
 
@@ -609,21 +804,20 @@ ArithmeticOperationReturn scalar_multiply_matrix(const MultiDimensionalMatrix* m
                 ((float*)result_matrix.head_ptr->data)[i] = ((float*)matrix->head_ptr->data)[i] * *((float*)scalar);
             }
             break;
-        
+
         case TYPE_DOUBLE:
             for (size_t i = 0; i < (matrix->head_ptr->data_size/sizeof(double)); i++) {
                 ((double*)result_matrix.head_ptr->data)[i] = ((double*)matrix->head_ptr->data)[i] * *((double*)scalar);
             }
             break;
-        
+
         default:
             // Unsupported Data_Type
-            // This section shouldn't be reached
-            response.error_code = ERR_UNKNOWN;
+            response.error_code = ERR_UNSUPPORTED_DATATYPE;
             clear_matrix(&result_matrix);
             return response;
     }
-    
+
 
     return response;
 }
