@@ -8,6 +8,7 @@
 
 
 typedef enum DataType {
+    TYPE_NOT_SET_YET,
     TYPE_INT,
     TYPE_FLOAT,
     TYPE_DOUBLE

@@ -26,17 +26,29 @@ static ErrorCode update_data_type(MultiDimensionalMatrix* matrix, DataType data_
 
     switch(data_type) {
         case TYPE_INT:
-            matrix->head_ptr->data = malloc(total_size * sizeof(int));
+            if (matrix->head_ptr->data_type != TYPE_NOT_SET_YET) {
+                matrix->head_ptr->data = realloc(matrix->head_ptr->data, total_size * sizeof(int));
+            } else {
+                matrix->head_ptr->data = malloc(total_size * sizeof(int));
+            }
             matrix->head_ptr->data_size = total_size * sizeof(int);
             break;
 
         case TYPE_FLOAT:
-            matrix->head_ptr->data = malloc(total_size * sizeof(float));
+            if (matrix->head_ptr->data_type != TYPE_NOT_SET_YET) {
+                matrix->head_ptr->data = realloc(matrix->head_ptr->data, total_size * sizeof(float));
+            } else {
+                matrix->head_ptr->data = malloc(total_size * sizeof(float));
+            }
             matrix->head_ptr->data_size = total_size * sizeof(float);
             break;
 
         case TYPE_DOUBLE:
-            matrix->head_ptr->data = malloc(total_size * sizeof(double));
+            if (matrix->head_ptr->data_type != TYPE_NOT_SET_YET) {
+                matrix->head_ptr->data = realloc(matrix->head_ptr->data, total_size * sizeof(double));
+            } else {
+                matrix->head_ptr->data = malloc(total_size * sizeof(double));
+            }
             matrix->head_ptr->data_size = total_size * sizeof(double);
             break;
 
@@ -92,7 +104,6 @@ ErrorCode create_matrix(MultiDimensionalMatrix* matrix, size_t number_of_dimensi
     }
 
     matrix->head_ptr = head_ptr;
-
     head_ptr->number_of_dimensions = number_of_dimensions;
 
     // Allocate space for the dimensions-array
@@ -105,6 +116,8 @@ ErrorCode create_matrix(MultiDimensionalMatrix* matrix, size_t number_of_dimensi
     }
 
     memcpy(head_ptr->dimensions, dimensions, number_of_dimensions * sizeof(size_t));
+
+    head_ptr->data_type = TYPE_NOT_SET_YET;
 
     return update_data_type(matrix, data_type);
 }

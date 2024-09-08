@@ -237,10 +237,10 @@ void test_change_data_type() {
     assert(error == ERR_NONE);
 
     // Check values before changing the data-type.
-    assert(*(int*)get_element_by_indices(&matrix, (size_t[]){0, 0} == 1));
-    assert(*(int*)get_element_by_indices(&matrix, (size_t[]){0, 1} == 2));
-    assert(*(int*)get_element_by_indices(&matrix, (size_t[]){1, 0} == 3));
-    assert(*(int*)get_element_by_indices(&matrix, (size_t[]){1, 1} == 4));
+    assert(*(int*)get_element_by_indices(&matrix, (size_t[]){0, 0}) == 1);
+    assert(*(int*)get_element_by_indices(&matrix, (size_t[]){0, 1}) == 2);
+    assert(*(int*)get_element_by_indices(&matrix, (size_t[]){1, 0}) == 3);
+    assert(*(int*)get_element_by_indices(&matrix, (size_t[]){1, 1}) == 4);
 
     error = change_data_type(&matrix, TYPE_INT);
     assert(error == ERR_INVALID_ARGS);
@@ -248,10 +248,10 @@ void test_change_data_type() {
     assert(error == ERR_NONE);
 
     // Check values after changing the data-type.
-    assert(*(int*)get_element_by_indices(&matrix, (size_t[]){0, 0} == 1));
-    assert(*(int*)get_element_by_indices(&matrix, (size_t[]){0, 1} == 2));
-    assert(*(int*)get_element_by_indices(&matrix, (size_t[]){1, 0} == 3));
-    assert(*(int*)get_element_by_indices(&matrix, (size_t[]){1, 1} == 4));
+    assert(*(int*)get_element_by_indices(&matrix, (size_t[]){0, 0}) == 1);
+    assert(*(int*)get_element_by_indices(&matrix, (size_t[]){0, 1}) == 2);
+    assert(*(int*)get_element_by_indices(&matrix, (size_t[]){1, 0}) == 3);
+    assert(*(int*)get_element_by_indices(&matrix, (size_t[]){1, 1}) == 4);
 
     // Clear matrix
     clear_matrix(&matrix);
