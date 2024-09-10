@@ -210,11 +210,6 @@ void test_resize_matrix() {
     assert(result.error_code == ERR_NONE);
     assert(result.result_matrix.head_ptr != NULL);
 
-    // DEBUG
-    printf("result_matrix[0][0] = %d\n", *(int*)get_element_by_indices(&result.result_matrix, (size_t[]){0, 0}));
-    printf("result_matrix[0][1] = %d\n", *(int*)get_element_by_indices(&result.result_matrix, (size_t[]){0, 1}));
-    //
-
     assert(*(int*)get_element_by_indices(&result.result_matrix, (size_t[]){0, 0}) == 2);
     assert(*(int*)get_element_by_indices(&result.result_matrix, (size_t[]){0, 1}) == 4);
     assert(*(int*)get_element_by_indices(&result.result_matrix, (size_t[]){1, 0}) == 6);

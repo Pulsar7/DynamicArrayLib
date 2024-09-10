@@ -26,28 +26,28 @@ static ErrorCode update_data_type(MultiDimensionalMatrix* matrix, DataType data_
 
     switch(data_type) {
         case TYPE_INT:
-            if (matrix->head_ptr->data_type != TYPE_NOT_SET_YET) {
-                matrix->head_ptr->data = realloc(matrix->head_ptr->data, total_size * sizeof(int));
-            } else {
+            if (matrix->head_ptr->data_type == TYPE_NOT_SET_YET) {
                 matrix->head_ptr->data = malloc(total_size * sizeof(int));
+            } else {
+                matrix->head_ptr->data = realloc(matrix->head_ptr->data, total_size * sizeof(int));
             }
             matrix->head_ptr->data_size = total_size * sizeof(int);
             break;
 
         case TYPE_FLOAT:
-            if (matrix->head_ptr->data_type != TYPE_NOT_SET_YET) {
-                matrix->head_ptr->data = realloc(matrix->head_ptr->data, total_size * sizeof(float));
-            } else {
+            if (matrix->head_ptr->data_type == TYPE_NOT_SET_YET) {
                 matrix->head_ptr->data = malloc(total_size * sizeof(float));
+            } else {
+                matrix->head_ptr->data = realloc(matrix->head_ptr->data, total_size * sizeof(float));
             }
             matrix->head_ptr->data_size = total_size * sizeof(float);
             break;
 
         case TYPE_DOUBLE:
-            if (matrix->head_ptr->data_type != TYPE_NOT_SET_YET) {
-                matrix->head_ptr->data = realloc(matrix->head_ptr->data, total_size * sizeof(double));
-            } else {
+            if (matrix->head_ptr->data_type == TYPE_NOT_SET_YET) {
                 matrix->head_ptr->data = malloc(total_size * sizeof(double));
+            } else {
+                matrix->head_ptr->data = realloc(matrix->head_ptr->data, total_size * sizeof(double));
             }
             matrix->head_ptr->data_size = total_size * sizeof(double);
             break;
