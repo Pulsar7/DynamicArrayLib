@@ -18,7 +18,8 @@
   - [Usage \& Example](#usage--example-6)
 - [`scalar_multiply_matrix`](#scalar_multiply_matrix)
   - [Usage \& Example](#usage--example-7)
-
+- [`change_data_type`](#change_data_type)
+  - [Usage \& Example](#usage--example-8)
 
 ## `create_matrix`
 
@@ -32,8 +33,6 @@ Required function parameters:
 4. `DataType data_type`: The data-type of the matrix-elements
 
 Unfortunately, only __int__, __float__ & __double__ are supported currently.
-
-The function returns an `ErrorCode`, which should be __ERR_NONE__ if the nothing went wrong.
 
 
 ### Usage & Example
@@ -50,6 +49,7 @@ if (err != ERR_NONE) {
     return 1;
 }
 
+// Deallocate space
 clear_matrix(&matrix);
 ```
 
@@ -77,8 +77,6 @@ Required function parameters:
 
 1. `MultiDimensionalMatrix* matrix`: A reference to the given matrix
 2. `size_t* indices`: Array of the requested indices
-
-The function returns a __void__-Pointer, which should be __NULL__ if an error occured.
 
 
 ### Usage & Example
@@ -119,7 +117,6 @@ Required function parameters:
 2. `size_t* indices`: Array of the requested indices
 3. `void* value`: A reference to the given value
 
-The function returns an `ErrorCode`, which should be __ERR_NONE__ if the nothing went wrong.
 
 ### Usage & Example
 
@@ -137,7 +134,7 @@ if (err != ERR_NONE) {
 
 int value = 42;
 size_t indices[2] = {1, 1};
-ErrorCode err = set_element_by_indices(&matrix, indices, (void*)&value); // or just `&value`, because it doesn't matter wether it's a int- or a void-pointer
+err = set_element_by_indices(&matrix, indices, (void*)&value); // or just `&value`, because it doesn't matter wether it's a int- or a void-pointer
 
 if (err == ERR_NONE) {
     printf("Set element %d at matrix[%ld][%ld]\n",value,indices[0],indices[1]);
@@ -145,6 +142,7 @@ if (err == ERR_NONE) {
     printf("Couldn't set the value\n");
 }
 
+// Deallocate space
 clear_matrix(&matrix);
 ```
 
@@ -159,7 +157,6 @@ Required function parameters:
 1. `MultiDimensionalMatrix* matrix`: A reference to the given matrix
 2. `void* static_array`: The static-array
 
-The function returns an `ErrorCode`, which should be __ERR_NONE__ if the nothing went wrong.
 
 ### Usage & Example
 
@@ -167,7 +164,11 @@ The function returns an `ErrorCode`, which should be __ERR_NONE__ if the nothing
 // Create matrix
 MultiDimensionalMatrix matrix;
 size_t dimensions[2] = {2, 2};
-create_matrix(&matrix, 2, dimensions, TYPE_INT);
+ErrorCode err = create_matrix(&matrix, 2, dimensions, TYPE_INT);
+if (err != ERR_NONE) {
+    printf("Couldn't create matrix\n");
+    return 1;
+}
 
 int static_array[2][2] = {
     {1, 2},
@@ -175,7 +176,7 @@ int static_array[2][2] = {
 };
 
 // Fill the matrix
-ErrorCode err = fill_matrix_from_static_array(&matrix, static_array);
+err = fill_matrix_from_static_array(&matrix, static_array);
 
 if (err == ERR_NONE) {
     printf("Copied values of static-array into matrix\n");
@@ -183,6 +184,7 @@ if (err == ERR_NONE) {
     printf("Couldn't fill the matrix\n");
 }
 
+// Deallocate space
 clear_matrix(&matrix);
 ```
 
@@ -197,7 +199,6 @@ Required function parameters:
 1. `const MultiDimensionalMatrix* matrix_A`: Reference to the first given matrix
 2. `const MultiDimensionalMatrix* matrix_B`: Reference to the second given matrix
 
-The function returns an `ArithmeticOperationReturn`, which is a struct and contains the `result_matrix` and the `error_code` (which should be __ERR_NONE__ if the operation went successful).
 
 ### Usage & Example
 
@@ -267,6 +268,7 @@ if (result.error_code == ERR_NONE) {
     printf("Something went wrong while trying to add both matrices\n");
 }
 
+// Deallocate space
 clear_matrix(&matrix_A);
 clear_matrix(&matrix_B);
 clear_matrix(&result.result_matrix);
@@ -282,8 +284,6 @@ Required function parameters:
 
 1. `const MultiDimensionalMatrix* matrix_A`: Reference to the first given matrix
 2. `const MultiDimensionalMatrix* matrix_B`: Reference to the second given matrix
-
-The function returns an `ArithmeticOperationReturn`, which is a struct and contains the `result_matrix` and the `error_code` (which should be __ERR_NONE__ if the operation went successful).
 
 
 ### Usage & Example
@@ -354,6 +354,7 @@ if (result.error_code == ERR_NONE) {
     printf("Something went wrong while trying to multiply both matrices\n");
 }
 
+// Deallocate space
 clear_matrix(&matrix_A);
 clear_matrix(&matrix_B);
 clear_matrix(&result.result_matrix);
@@ -369,8 +370,6 @@ Required function parameters:
 1. `const MultiDimensionalMatrix* matrix`: Reference to a given matrix
 2. `void* scalar`: A reference to the given value
 
-
-The function returns an `ArithmeticOperationReturn`, which is a struct and contains the `result_matrix` and the `error_code` (which should be __ERR_NONE__ if the operation went successful).
 
 
 ### Usage & Example
@@ -423,6 +422,74 @@ for (size_t i = 0; i < dimensions[0]; i++) {
     }
 }
 
+// Deallocate space
 clear_matrix(&matrix);
 clear_matrix(&resp.result_matrix);
+```
+
+## `change_data_type`
+
+Changes the data-type of the elements in a given matrix.
+
+Required function parameters:
+
+1. `const MultiDimensionalMatrix* matrix`: Reference to a given matrix
+2. `DataType new_data_type`: The new data-type
+
+
+### Usage & Example
+
+```C
+// Create matrix
+MultiDimensionalMatrix matrix;
+size_t dimensions[2] = {2, 2};
+
+if (create_matrix(&matrix, 2, dimensions, TYPE_INT) != ERR_NONE) {
+    printf("Couldn't create matrix\n");
+    return 1;
+}
+
+// Fill matrix with integers.
+
+int static_array[2][2] = {
+    {1, 2},
+    {3, 4}
+};
+
+ErrorCode err = fill_matrix_from_static_array(&matrix, static_array);
+
+if (err != ERR_NONE) {
+    printf("Couldn't fill matrix from static array\n");
+    clear_matrix(&matrix);
+    return 1;
+}
+
+// Output matrix
+size_t indices[2];
+
+for (size_t i = 0; i < dimensions[0]; i++) {
+    for (size_t j = 0; j < dimensions[1]; j++) {
+        indices[0] = i;
+        indices[1] = j;
+        void* retrieved_value = get_element_by_indices(&matrix, indices);
+        if (!retrieved_value) {
+            printf("Couldn't get value at matrix[%ld][%ld]\n",i,j);
+            continue;
+        }
+        printf("matrix[%ld][%ld]=%d\n",i,j,*(int*)retrieved_value);
+    }
+}
+
+// Change data-type to float.
+
+err = change_data_type(&matrix, TYPE_FLOAT);
+
+if (err != ERR_NONE) {
+    printf("Couldn't change the data-type\n");
+    clear_matrix(&matrix);
+    return 1;
+}
+
+// Deallocate space
+clear_matrix(&matrix);
 ```

@@ -516,6 +516,30 @@ ErrorCode change_data_type(MultiDimensionalMatrix* matrix, DataType new_data_typ
     return update_data_type(matrix, new_data_type);
 }
 
+// Printout given matrix in the CLI.
+ErrorCode printout_matrix(MultiDimensionalMatrix* matrix) {
+    /*
+    
+        Returns an ErrorCode.
+
+        ERR_NONE            = No error.
+        ERR_NULL_PTR        = Matrix does not exist or head-pointer is NULL;
+    
+    */
+    if (!matrix || !matrix->head_ptr) {
+        // Matrix does not exist or head-pointer is NULL.
+        return ERR_NULL_PTR;
+    }
+
+    size_t indices[matrix->head_ptr->number_of_dimensions];
+    // Iterate dimensions.
+    for (size_t dimension = 0; dimension < matrix->head_ptr->number_of_dimensions; dimension++) {
+        
+        indices[dimension] = 
+    }
+
+}
+
 
 //
 // Arithmetic Operations

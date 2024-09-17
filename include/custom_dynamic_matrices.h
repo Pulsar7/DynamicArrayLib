@@ -57,5 +57,6 @@ ArithmeticOperationReturn scalar_multiply_matrix(const MultiDimensionalMatrix* m
 ErrorCode resize_matrix(MultiDimensionalMatrix* matrix, size_t new_number_of_dimensions, size_t* new_dimensions);
 //static ErrorCode update_data_type(MultiDimensionalMatrix* matrix, DataType data_type);
 ErrorCode change_data_type(MultiDimensionalMatrix* matrix, DataType new_data_type);
+ErrorCode printout_matrix(MultiDimensionalMatrix* matrix);
 
 #endif // CUSTOM_DYNAMIC_MATRICES_H

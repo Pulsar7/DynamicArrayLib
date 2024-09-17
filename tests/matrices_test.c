@@ -250,5 +250,4 @@ void test_change_data_type() {
 
     // Clear matrix
     clear_matrix(&matrix);
-
 }
