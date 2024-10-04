@@ -219,9 +219,14 @@ ErrorCode append_to_list(DynamicArray* dynamic_array, void* element, size_t elem
 ErrorCode clear_list(DynamicArray* dynamic_array) {
     /*
 
-        Returns an ErrorCode, which should be `ERR_NONE` if no error occured.
+        Returns an ErrorCode.
         Sets the head- & tail-pointer to `NULL`.
-    
+
+        ERR_NONE                = No error.
+        ERR_INVALID_ARGS        = The given list does not exist;
+        ERR_INVALID_HEAD_PTR    = The list-head-pointer is NULL;
+        ERR_INVALID_TAIL_PTR    = The list-tail-pointer is NULL;
+
     */
 
     if (!dynamic_array) {
@@ -238,6 +243,9 @@ ErrorCode clear_list(DynamicArray* dynamic_array) {
         // Invalid tail-pointer
         return ERR_INVALID_TAIL_PTR;
     }
+
+    // Iterate whole list.
+    // Free list from the HEAD to the TAIL.
 
     DynamicArrayNode* current_ptr = dynamic_array->head_ptr;
 
@@ -292,7 +300,7 @@ size_t count_list_elements(DynamicArray* dynamic_array) {
     return counter;
 }
 
-// Get element by index
+// Get element by its list-index
 void* get_list_element_by_index(DynamicArray* dynamic_array, int index) {
     /*
 
@@ -300,6 +308,8 @@ void* get_list_element_by_index(DynamicArray* dynamic_array, int index) {
         Returns the NULL-pointer if something went wrong.
 
     */
+
+    // Check arguments.
 
     if (!dynamic_array || index < LIST_END_POS) {
         // List does not exist or given index is invalid
@@ -313,6 +323,8 @@ void* get_list_element_by_index(DynamicArray* dynamic_array, int index) {
     if (index == LIST_END_POS) {
         return dynamic_array->tail_ptr->element;
     }
+
+    // Iterate through list until the counter equals the given index or the index is out of boundaries.
 
     int counter = 0;
     DynamicArrayNode* current_ptr = dynamic_array->head_ptr;
