@@ -6,7 +6,7 @@ ErrorCode initialize_list(DynamicArray* dynamic_array, void* first_element, size
     /*
 
         Returns an ErrorCode, which should be `ERR_NONE` if no error occured.
-   
+
 	    ERR_INVALID_ARGS	= Given element does not exist; Element size is invalid;
 
     */
@@ -16,9 +16,9 @@ ErrorCode initialize_list(DynamicArray* dynamic_array, void* first_element, size
         return ERR_INVALID_ARGS;
     }
 
-    dynamic_array->head_ptr = NULL;
-    dynamic_array->tail_ptr = NULL;
-    
+    dynamic_array->head_ptr = NULL; // Required for `add_node` to make sure it's a new list.
+    dynamic_array->tail_ptr = NULL; // "-"
+
     ErrorCode response = add_node(dynamic_array, first_element, element_size, LIST_START_POS);
     return response;
 }
@@ -29,7 +29,7 @@ ErrorCode add_node(DynamicArray* dynamic_array, void* element, size_t element_si
 
         Returns an ErrorCode, which should be `ERR_NONE` if no error occured.
         Edits the head_ptr/tail_ptr if needed.
-    
+
     */
 
     // Checks arguments
@@ -39,7 +39,7 @@ ErrorCode add_node(DynamicArray* dynamic_array, void* element, size_t element_si
 
     if (!dynamic_array->head_ptr) {
         // List is empty
-        // A head-pointer has to be created
+        // A head-pointer must to be created
 
         DynamicArrayNode* new_head_ptr = (DynamicArrayNode*) malloc(sizeof(DynamicArrayNode));
 
@@ -257,7 +257,7 @@ ErrorCode clear_list(DynamicArray* dynamic_array) {
 
     dynamic_array->head_ptr = NULL;
     dynamic_array->tail_ptr = NULL;
-    
+
     return ERR_NONE;
 }
 
@@ -298,7 +298,7 @@ void* get_list_element_by_index(DynamicArray* dynamic_array, int index) {
 
         Returns the reference to the element.
         Returns the NULL-pointer if something went wrong.
-    
+
     */
 
     if (!dynamic_array || index < LIST_END_POS) {
@@ -334,9 +334,17 @@ void* get_list_element_by_index(DynamicArray* dynamic_array, int index) {
 ErrorCode set_list_element_by_index(DynamicArray* dynamic_array, int index, void* element, size_t element_size) {
     /*
 
-        Returns an ErrorCode, which should be `ERR_NONE` if no error occured.
-    
+        Returns an ErrorCode.
+
+
+        ERR_NONE            = No error.
+        ERR_INVALID_ARGS    = Given dynamic-array does not exist; index is smaller than the LIST_END_POS
+        ERR_INVALID_INDEX   = Given index is too large
+        ERR_REALLOC_FAILED  = `realloc`-operation failed
+
     */
+
+    // Check arguments.
 
     if (!dynamic_array || index < LIST_END_POS) {
         return ERR_INVALID_ARGS;
@@ -345,15 +353,18 @@ ErrorCode set_list_element_by_index(DynamicArray* dynamic_array, int index, void
     void* new_element_pointer = NULL;
 
     if (index == LIST_START_POS) {
+        // Given INDEX is the head-pointer.
         new_element_pointer = dynamic_array->head_ptr->element;
     }
 
     if (index == LIST_END_POS) {
+        // Given INDEX is the tail-pointer.
         new_element_pointer = dynamic_array->tail_ptr->element;
     }
 
-
+    // Given index is wether the head- nor the tail-pointer.
     if (!new_element_pointer) {
+        // Iterating through list until counter equals the given index or index is out of boundaries.
         DynamicArrayNode* current_ptr = dynamic_array->head_ptr;
         int counter = 0;
         while (current_ptr != NULL && counter != index) {
@@ -362,18 +373,24 @@ ErrorCode set_list_element_by_index(DynamicArray* dynamic_array, int index, void
         }
 
         if (!current_ptr) {
-            // Index is out of boundaries
+            // Index is out of boundaries.
             return ERR_INVALID_INDEX;
         }
 
         new_element_pointer = current_ptr->element;
     }
 
-    void* this_element = realloc(new_element_pointer, element_size);
-    if (!this_element) {
-        // Reallocation-Error
+    // Resize (if needed) the current element-data on heap.
+    void* resized_element_ptr = realloc(new_element_pointer, element_size);
+    if (!resized_element_ptr) {
+        // Reallocation-Error.
+        // Couldn't resize element.
         return ERR_REALLOC_FAILED;
     }
+
+    new_element_pointer = resized_element_ptr;
+
+    // Overwrite old element with new element.
     memcpy(new_element_pointer, element, element_size);
     return ERR_NONE;
 }
