@@ -244,10 +244,10 @@ void test_change_data_type() {
     assert(error == ERR_NONE);
 
     // Check values after changing the data-type.
-    assert(*(int*)get_element_by_indices(&matrix, (size_t[]){0, 0}) == 1);
-    assert(*(int*)get_element_by_indices(&matrix, (size_t[]){0, 1}) == 2);
-    assert(*(int*)get_element_by_indices(&matrix, (size_t[]){1, 0}) == 3);
-    assert(*(int*)get_element_by_indices(&matrix, (size_t[]){1, 1}) == 4);
+    assert(*(float*)get_element_by_indices(&matrix, (size_t[]){0, 0}) == 1);
+    assert(*(float*)get_element_by_indices(&matrix, (size_t[]){0, 1}) == 2);
+    assert(*(float*)get_element_by_indices(&matrix, (size_t[]){1, 0}) == 3);
+    assert(*(float*)get_element_by_indices(&matrix, (size_t[]){1, 1}) == 4);
 
     // Clear matrix
     clear_matrix(&matrix);

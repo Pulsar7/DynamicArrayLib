@@ -10,6 +10,8 @@ static ErrorCode update_data_type(MultiDimensionalMatrix* matrix, DataType data_
         ERR_NONE                 = No error.
         ERR_NULL_PTR             = Matrix does not exist or head-pointer is NULL;
         ERR_UNSUPPORTED_DATATYPE = Given data_type is invalid;
+        ERR_MALLOC_FAILED        = Temporary-Array for type-conversion cannot be created; Cannot allocate space for the matrix-data;
+        ERR_REALLOC_FAILED       = Cannot resize given matrix-data;
 
     */
     if (!matrix || !matrix->head_ptr) {
@@ -24,32 +26,21 @@ static ErrorCode update_data_type(MultiDimensionalMatrix* matrix, DataType data_
         total_size *= matrix->head_ptr->dimensions[i];
     }
 
+    size_t new_data_size = 0;
+    Boolean use_resize = (matrix->head_ptr->data_type == TYPE_NOT_SET_YET) ? FALSE : TRUE;
+
     switch(data_type) {
+
         case TYPE_INT:
-            if (matrix->head_ptr->data_type == TYPE_NOT_SET_YET) {
-                matrix->head_ptr->data = malloc(total_size * sizeof(int));
-            } else {
-                matrix->head_ptr->data = realloc(matrix->head_ptr->data, total_size * sizeof(int));
-            }
-            matrix->head_ptr->data_size = total_size * sizeof(int);
+            new_data_size = total_size * sizeof(int);
             break;
 
         case TYPE_FLOAT:
-            if (matrix->head_ptr->data_type == TYPE_NOT_SET_YET) {
-                matrix->head_ptr->data = malloc(total_size * sizeof(float));
-            } else {
-                matrix->head_ptr->data = realloc(matrix->head_ptr->data, total_size * sizeof(float));
-            }
-            matrix->head_ptr->data_size = total_size * sizeof(float);
+            new_data_size = total_size * sizeof(float);
             break;
 
         case TYPE_DOUBLE:
-            if (matrix->head_ptr->data_type == TYPE_NOT_SET_YET) {
-                matrix->head_ptr->data = malloc(total_size * sizeof(double));
-            } else {
-                matrix->head_ptr->data = realloc(matrix->head_ptr->data, total_size * sizeof(double));
-            }
-            matrix->head_ptr->data_size = total_size * sizeof(double);
+            new_data_size = total_size * sizeof(double);
             break;
 
         default:
@@ -59,13 +50,158 @@ static ErrorCode update_data_type(MultiDimensionalMatrix* matrix, DataType data_
             return ERR_UNSUPPORTED_DATATYPE;
     }
 
-    if (!matrix->head_ptr->data) {
-        // Allocation-Error or invalid data_type
-        clear_matrix(matrix);
-        return ERR_MALLOC_FAILED;
+    // Allocate space.
+    if (!use_resize) {
+        // Allocate space for the data of a new matrix.
+        matrix->head_ptr->data = malloc(new_data_size);
+    } else {
+        // Resize matrix-data.
+
+        void* temp_array;
+
+        switch(data_type) {
+
+            case TYPE_INT:
+                // Reinterpret current data in `int`
+
+                if (matrix->head_ptr->data_type == TYPE_FLOAT) {
+                    // Change from `float` to `int`
+
+                    // Create temporary `int`-array.
+                    temp_array = malloc(new_data_size);
+                    if (!temp_array) {
+                        return ERR_MALLOC_FAILED;
+                    }
+
+                    // Iterate through float-array.
+                    size_t float_elements_amount = matrix->head_ptr->data_size/sizeof(float);
+                    for (size_t counter = 0; counter < float_elements_amount; counter++) {
+                        ((int*)temp_array)[counter] = (int)((float*)matrix->head_ptr->data)[counter];
+                    }
+
+                }
+
+                if (matrix->head_ptr->data_type == TYPE_DOUBLE) {
+                    // Change from `double` to `int`
+
+                    // Create temporary `int`-array.
+                    temp_array = malloc(new_data_size);
+                    if (!temp_array) {
+                        return ERR_MALLOC_FAILED;
+                    }
+
+                    // Iterate through float-array.
+                    size_t float_elements_amount = matrix->head_ptr->data_size/sizeof(double);
+                    for (size_t counter = 0; counter < float_elements_amount; counter++) {
+                        ((int*)temp_array)[counter] = (int)((double*)matrix->head_ptr->data)[counter];
+                    }
+                }
+
+                break;
+
+
+            case TYPE_FLOAT:
+                // Reinterprete current data in `float`
+
+                if (matrix->head_ptr->data_type == TYPE_INT) {
+                    // Change from `int` to `float`
+
+                    // Create temporary `float`-array
+                    temp_array = malloc(new_data_size);
+                    if (!temp_array) {
+                        return ERR_MALLOC_FAILED;
+                    }
+
+                    // Iterate through int-array.
+                    size_t int_elements_amount = matrix->head_ptr->data_size/sizeof(int);
+                    for (size_t counter = 0; counter < int_elements_amount; counter++) {
+                        ((float*)temp_array)[counter] = (float)((int*)matrix->head_ptr->data)[counter];
+                    }
+
+                }
+
+                if (matrix->head_ptr->data_type == TYPE_DOUBLE) {
+                    // Change from `double` to `float`
+
+                    // Create temporary `float`-array
+                    temp_array = malloc(new_data_size);
+                    if (!temp_array) {
+                        return ERR_MALLOC_FAILED;
+                    }
+
+                    // Iterate through int-array.
+                    size_t double_elements_amount = matrix->head_ptr->data_size/sizeof(double);
+                    for (size_t counter = 0; counter < double_elements_amount; counter++) {
+                        ((float*)temp_array)[counter] = (float)((double*)matrix->head_ptr->data)[counter];
+                    }
+
+                }
+
+                break;
+
+            case TYPE_DOUBLE:
+                // Reinterprete current data in `double`
+
+                if (matrix->head_ptr->data_type == TYPE_INT) {
+                    // Change from `int` to `double`
+
+                    // Create temporary `double`-array
+                    temp_array = malloc(new_data_size);
+                    if (!temp_array) {
+                        return ERR_MALLOC_FAILED;
+                    }
+
+                    // Iterate through int-array.
+                    size_t int_elements_amount = matrix->head_ptr->data_size/sizeof(int);
+                    for (size_t counter = 0; counter < int_elements_amount; counter++) {
+                        ((double*)temp_array)[counter] = (double)((int*)matrix->head_ptr->data)[counter];
+                    }
+
+                }
+
+                if (matrix->head_ptr->data_type == TYPE_FLOAT) {
+                    // Change from `float` to `double`
+
+                    // Create temporary `double`-array
+                    temp_array = malloc(new_data_size);
+                    if (!temp_array) {
+                        return ERR_MALLOC_FAILED;
+                    }
+
+                    // Iterate through float-array.
+                    size_t float_elements_amount = matrix->head_ptr->data_size/sizeof(float);
+                    for (size_t counter = 0; counter < float_elements_amount; counter++) {
+                        ((double*)temp_array)[counter] = (double)((float*)matrix->head_ptr->data)[counter];
+                    }
+
+                }
+
+                break;
+
+        }
+
+
+
+        // Resize matrix-data
+        matrix->head_ptr->data = realloc(matrix->head_ptr->data, new_data_size);
+
+        if (matrix->head_ptr->data) {
+            // Set temporary array as new matrix-data.
+            matrix->head_ptr->data = temp_array;
+        }
     }
 
+    if (!matrix->head_ptr->data) {
+        // Allocation-Error or invalid data_type.
+        // `malloc` or `realloc` failed.
+        clear_matrix(matrix);
+        return (!use_resize) ? ERR_MALLOC_FAILED : ERR_REALLOC_FAILED;
+    }
+
+    // Set new data-type.
     matrix->head_ptr->data_type = data_type;
+    // Set new data-size.
+    matrix->head_ptr->data_size = new_data_size;
 
     return ERR_NONE;
 }
@@ -668,7 +804,7 @@ ArithmeticOperationReturn multiply_2d_matrices(const MultiDimensionalMatrix* mat
 
         - MultiDimensionalMatrix result_matrix: The result of this operation.
         - ErrorCode error_code                : Indicating the operation status.
-        
+
 
         Possible `ErrorCodes`:
 
@@ -701,7 +837,6 @@ ArithmeticOperationReturn multiply_2d_matrices(const MultiDimensionalMatrix* mat
         response.error_code = ERR_INVALID_ARGS;
         return response;
     }
-    
 
     // Check data_type
     if (matrix_A->head_ptr->data_type != matrix_B->head_ptr->data_type) {
@@ -735,7 +870,7 @@ ArithmeticOperationReturn multiply_2d_matrices(const MultiDimensionalMatrix* mat
     switch(matrix_A->head_ptr->data_type) {
         case TYPE_INT:
             int* int_dataA = (int*)matrix_A->head_ptr->data;
-            int* int_dataB = (int*)matrix_B->head_ptr->data; 
+            int* int_dataB = (int*)matrix_B->head_ptr->data;
             int* int_result = (int*)result_matrix.head_ptr->data;
 
             for (size_t i = 0; i < rows_A; i++) {
@@ -747,10 +882,10 @@ ArithmeticOperationReturn multiply_2d_matrices(const MultiDimensionalMatrix* mat
                 }
             }
             break;
-        
+
         case TYPE_FLOAT:
             float* float_dataA = (float*)matrix_A->head_ptr->data;
-            float* float_dataB = (float*)matrix_B->head_ptr->data; 
+            float* float_dataB = (float*)matrix_B->head_ptr->data;
             float* float_result = (float*)result_matrix.head_ptr->data;
 
             for (size_t i = 0; i < rows_A; i++) {
@@ -798,7 +933,7 @@ ArithmeticOperationReturn scalar_multiply_matrix(const MultiDimensionalMatrix* m
 
         - MultiDimensionalMatrix result_matrix: The result of this operation.
         - ErrorCode error_code                : Indicating the operation status.
-        
+
 
         Possible `ErrorCodes`:
 
@@ -839,7 +974,7 @@ ArithmeticOperationReturn scalar_multiply_matrix(const MultiDimensionalMatrix* m
                 ((int*)result_matrix.head_ptr->data)[i] = ((int*)matrix->head_ptr->data)[i] * *((int*)scalar);
             }
             break;
-        
+
         case TYPE_FLOAT:
             for (size_t i = 0; i < (matrix->head_ptr->data_size/sizeof(float)); i++) {
                 ((float*)result_matrix.head_ptr->data)[i] = ((float*)matrix->head_ptr->data)[i] * *((float*)scalar);

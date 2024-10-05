@@ -19,5 +19,9 @@ typedef enum ErrorCode {
     ERR_UNKNOWN = 0xFF
 } ErrorCode;
 
+typedef enum Boolean {
+    FALSE,
+    TRUE
+} Boolean;
 
 #endif // CONSTANTS_H
