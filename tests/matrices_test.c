@@ -8,6 +8,7 @@ void test_create_matrix() {
     // Test valid matrix creation
     ErrorCode err = create_matrix(&matrix, 3, dimensions, TYPE_INT);
     assert(err == ERR_NONE);
+    assert(matrix.head_ptr->data_size == sizeof(int)*12);
     assert(matrix.head_ptr->data != NULL);
     assert(matrix.head_ptr->dimensions[0] == dimensions[0]);
     assert(matrix.head_ptr->dimensions[1] == dimensions[1]);
@@ -222,6 +223,8 @@ void test_resize_matrix() {
 }
 
 void test_change_data_type() {
+    // 1. CHECK WITH INT TO FLOAT.
+
     // Create matrix.
     MultiDimensionalMatrix matrix;
     size_t dimensions[2] = { 2, 2 };
@@ -248,6 +251,57 @@ void test_change_data_type() {
     assert(*(float*)get_element_by_indices(&matrix, (size_t[]){0, 1}) == 2);
     assert(*(float*)get_element_by_indices(&matrix, (size_t[]){1, 0}) == 3);
     assert(*(float*)get_element_by_indices(&matrix, (size_t[]){1, 1}) == 4);
+
+
+    // 2. CHECK WITH FLOAT TO INT.
+
+    error = change_data_type(&matrix, TYPE_INT);
+    assert(error == ERR_NONE);
+
+    // Check values after changing data-type.
+    assert(*(int*)get_element_by_indices(&matrix, (size_t[]){0, 0}) == 1);
+    assert(*(int*)get_element_by_indices(&matrix, (size_t[]){0, 1}) == 2);
+    assert(*(int*)get_element_by_indices(&matrix, (size_t[]){1, 0}) == 3);
+    assert(*(int*)get_element_by_indices(&matrix, (size_t[]){1, 1}) == 4);
+
+
+    // 3. CHECK WITH INT TO DOUBLE.
+
+    error = change_data_type(&matrix, TYPE_DOUBLE);
+    assert(error == ERR_NONE);
+    assert(matrix.head_ptr->data_size == sizeof(double)*4);
+
+    // Check values after changing data-type.
+    assert(*(double*)get_element_by_indices(&matrix, (size_t[]){0, 0}) == 1);
+    assert(*(double*)get_element_by_indices(&matrix, (size_t[]){0, 1}) == 2);
+    assert(*(double*)get_element_by_indices(&matrix, (size_t[]){1, 0}) == 3);
+    assert(*(double*)get_element_by_indices(&matrix, (size_t[]){1, 1}) == 4);
+
+    // Clear matrix
+    clear_matrix(&matrix);
+
+
+    // 4. CHECK WITH DOUBLE TO INT (new matrix)
+
+    // Create matrix.
+    create_matrix(&matrix, 2, dimensions, TYPE_DOUBLE);
+
+    // Fill matrix with integers.
+    double double_static_array[2][2] = { {1.32434, 2.7384}, {3.3955, 4.99191} };
+    error = fill_matrix_from_static_array(&matrix, double_static_array);
+    assert(error == ERR_NONE);
+    assert(matrix.head_ptr->data_size == sizeof(double)*4);
+
+    error = change_data_type(&matrix, TYPE_INT);
+    assert(error == ERR_NONE);
+    assert(matrix.head_ptr->data_size == sizeof(int)*4);
+
+    // Check values after changing data-type.
+    assert(*(int*)get_element_by_indices(&matrix, (size_t[]){0, 0}) == 1);
+    assert(*(int*)get_element_by_indices(&matrix, (size_t[]){0, 1}) == 2);
+    assert(*(int*)get_element_by_indices(&matrix, (size_t[]){1, 0}) == 3);
+    assert(*(int*)get_element_by_indices(&matrix, (size_t[]){1, 1}) == 4);
+
 
     // Clear matrix
     clear_matrix(&matrix);
