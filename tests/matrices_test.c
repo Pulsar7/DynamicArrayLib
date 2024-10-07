@@ -5,43 +5,48 @@ void test_create_matrix() {
     MultiDimensionalMatrix matrix;
     size_t dimensions[3] = {3, 2, 2};
 
-    // Test valid matrix creation
+    // Create matrix
     ErrorCode err = create_matrix(&matrix, 3, dimensions, TYPE_INT);
     assert(err == ERR_NONE);
+
+    // Check if matrix is valid
     assert(matrix.head_ptr->data_size == sizeof(int)*12);
     assert(matrix.head_ptr->data != NULL);
+
+    // Check dimensions
     assert(matrix.head_ptr->dimensions[0] == dimensions[0]);
     assert(matrix.head_ptr->dimensions[1] == dimensions[1]);
     assert(matrix.head_ptr->dimensions[2] == dimensions[2]);
 
-
+    // Clear matrix
     clear_matrix(&matrix);
 }
 
 void test_set_and_get_element() {
+    // Create matrix
     MultiDimensionalMatrix matrix;
     size_t dimensions[2] = {2, 2};
     create_matrix(&matrix, 2, dimensions, TYPE_INT);
 
+    // Set value in matrix-data by its indices
     int value = 42;
     size_t indices[2] = {1, 1};
     ErrorCode err = set_element_by_indices(&matrix, indices, (void*)&value);
     assert(err == ERR_NONE);
 
+    // Get value by valid indices
     int* retrieved_value = (int*)get_element_by_indices(&matrix, indices);
+    assert(retrieved_value != NULL);
     assert(*retrieved_value == 42);
 
-    // Test if errors are handled properly
-
-    // Invalid data-type
+    // Attempting to insert a `float`-value into a `int`-matrix
     float float_value = 3.14;
     err = set_element_by_indices(&matrix, indices, (void*)&float_value);
     assert(err == ERR_NONE);
-
     void* error_result = get_element_by_indices(&matrix, indices);
-    assert(*(int*)error_result != (int)float_value);
+    assert(*(int*)error_result != (int)float_value); // BUT WHY?!
 
-    // Index should be out of range
+    // Attempting to access indices, which are out of boundaries
     error_result = get_element_by_indices(&matrix, (size_t[]){2, 2});
     assert(error_result == NULL);
 
@@ -50,21 +55,24 @@ void test_set_and_get_element() {
 }
 
 void test_add_matrices() {
+    // Create matrixA & matrixB (both type `int`)
     MultiDimensionalMatrix matrix_A, matrix_B;
     size_t dimensions[2] = {2, 2};
     create_matrix(&matrix_A, 2, dimensions, TYPE_INT);
     create_matrix(&matrix_B, 2, dimensions, TYPE_INT);
 
+    // Fill first indices of both matrices
     int val1 = 1, val2 = 2;
     set_element_by_indices(&matrix_A, (size_t[]){0, 0}, (void*)&val1);
     set_element_by_indices(&matrix_B, (size_t[]){0, 0}, (void*)&val2);
 
+    // Calculate the sum of both matrices & fetch result
     ArithmeticOperationReturn result = add_matrices(&matrix_A, &matrix_B);
     assert(result.error_code == ERR_NONE);
     int* result_value = (int*)get_element_by_indices(&result.result_matrix, (size_t[]){0, 0});
     assert(*result_value == 3);
 
-    // Add matrices with different dimension-sizes
+    // Attempt to add matrices with different dimension-sizes
     MultiDimensionalMatrix third_matrix;
     dimensions[0] = 1;
     create_matrix(&third_matrix, 2, dimensions, TYPE_INT);
@@ -72,7 +80,7 @@ void test_add_matrices() {
     result = add_matrices(&matrix_A, &third_matrix);
     assert(result.error_code == ERR_DIMENSION_SIZE_MISMATCH);
 
-    // Add matrices with different data-types
+    // Attempt to add matrices with different data-types
     dimensions[0] = 2;
     MultiDimensionalMatrix fourth_matrix;
     ErrorCode error = create_matrix(&fourth_matrix, 2, dimensions, TYPE_FLOAT);
@@ -81,6 +89,7 @@ void test_add_matrices() {
     result = add_matrices(&matrix_A, &fourth_matrix);
     assert(result.error_code == ERR_DATATYPE_MISMATCH);
 
+    // Clear all matrices
     clear_matrix(&matrix_A);
     clear_matrix(&matrix_B);
     clear_matrix(&result.result_matrix);

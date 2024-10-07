@@ -178,9 +178,11 @@ static ErrorCode update_data_type(MultiDimensionalMatrix* matrix, DataType data_
 
                 break;
 
+            default:
+                // Invalid data-type.
+                return ERR_UNSUPPORTED_DATATYPE;
+
         }
-
-
 
         // Resize matrix-data
         matrix->head_ptr->data = realloc(matrix->head_ptr->data, new_data_size);
@@ -304,20 +306,21 @@ static IndexCalcReturn calc_index(MultiDimensionalMatrix* matrix, size_t* indice
     }
 
     size_t index = 0; // Calculated index
+
     /*
-    
-        The offset is used to account for the size of each dimension and to calculate the 
+
+        The offset is used to account for the size of each dimension and to calculate the
         correct position of an element in a flattened version of the multidimensional array.
-    
+
     */
 
     size_t offset = 1;
 
     /*
 
-        The value `i` can't be a `size_t`, 
+        The value `i` can't be a `size_t`,
         because the expression `i >= 0` would be always true.
-    
+
     */
 
     for (int i = matrix->head_ptr->number_of_dimensions - 1; i >= 0; --i) {
@@ -327,7 +330,7 @@ static IndexCalcReturn calc_index(MultiDimensionalMatrix* matrix, size_t* indice
 
     return_data.error_code = ERR_NONE;
     return_data.index = index;
-    
+
     return return_data;
 }
 
@@ -349,12 +352,11 @@ void* get_element_by_indices(MultiDimensionalMatrix* matrix, size_t* indices) {
 
     if (return_data.error_code != ERR_NONE) {
         // Something went wrong while trying to calculate the index
-        // 
         return NULL;
     }
 
     size_t index = return_data.index;
-    
+
     // Check if calculated index is out of bounds
     // And return requested value if index is valid
     switch(matrix->head_ptr->data_type) {
@@ -363,21 +365,18 @@ void* get_element_by_indices(MultiDimensionalMatrix* matrix, size_t* indices) {
                 return NULL;
             }
             return (void*)((int*)matrix->head_ptr->data + index);
-            break; // Unreachable ???
 
         case TYPE_FLOAT:
             if (index >= matrix->head_ptr->data_size / sizeof(float)) {
                 return NULL;
             }
             return (void*)((float*)matrix->head_ptr->data + index);
-            break; // Unreachable ???
-        
+
         case TYPE_DOUBLE:
             if (index >= matrix->head_ptr->data_size / sizeof(double)) {
                 return NULL;
             }
             return (void*)((double*)matrix->head_ptr->data + index);
-            break; // Unreachable ???
 
         default:
             // Unsupported Data-Type
@@ -422,7 +421,7 @@ static ErrorCode set_element_by_linear_index(MultiDimensionalMatrix* matrix, siz
             }
             ((float*)matrix->head_ptr->data)[index] = *(float*)value;
             break;
-        
+
         case TYPE_DOUBLE:
             if (index >= matrix->head_ptr->data_size / sizeof(double)) {
                 return ERR_INVALID_INDEX;
@@ -522,14 +521,14 @@ ErrorCode fill_matrix_from_static_array(MultiDimensionalMatrix* matrix, void* st
 
         // Set element at specific position
         response = set_element_by_linear_index(matrix, i, this_element);
-        
+
         if (response != ERR_NONE) {
             // Couldn't set element in matrix
             return response;
         }
 
     }
-    
+
     return ERR_NONE;
 
 }
@@ -574,7 +573,6 @@ ErrorCode resize_matrix(MultiDimensionalMatrix* matrix, size_t new_number_of_dim
             }
         }
 
-
     } else {
         // `new_number_of_dimensions` should equal the old one
         // Check dimension-sizes
@@ -592,17 +590,6 @@ ErrorCode resize_matrix(MultiDimensionalMatrix* matrix, size_t new_number_of_dim
             return ERR_NONE;
         }
 
-        // !!!
-        //
-        // Shouldn't be reachable for now
-        // DEBUG
-        //
-        // !!!
-
-        //if (equal) {
-            // Nothing to change.
-        //    return ERR_NONE;
-        //}
     }
 
     // Reallocate space for the dimensions-array
@@ -663,7 +650,6 @@ ErrorCode printout_matrix(MultiDimensionalMatrix* matrix) {
 
     */
 
-    /*
     if (!matrix || !matrix->head_ptr) {
         // Matrix does not exist or head-pointer is NULL.
         return ERR_NULL_PTR;
@@ -672,11 +658,8 @@ ErrorCode printout_matrix(MultiDimensionalMatrix* matrix) {
     size_t indices[matrix->head_ptr->number_of_dimensions];
     // Iterate dimensions.
     for (size_t dimension = 0; dimension < matrix->head_ptr->number_of_dimensions; dimension++) {
-        
-        indices[dimension] = 
+        //
     }
-
-    */
 
 }
 
@@ -694,7 +677,7 @@ ArithmeticOperationReturn add_matrices(const MultiDimensionalMatrix* matrix_A, c
 
         - MultiDimensionalMatrix result_matrix: The result of this operation.
         - ErrorCode error_code                : Indicating the operation status.
-        
+
 
         Possible `ErrorCodes`:
 
